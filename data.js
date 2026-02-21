@@ -5,7 +5,7 @@
 // =========================================================
 
 const SECTOR_COLORS = {
-  "Banking":                          "#6366f1",
+  "Banks":                            "#6366f1",
   "Capital Goods":                    "#8b5cf6",
   "Materials":                        "#06b6d4",
   "Consumer Services":                "#f59e0b",

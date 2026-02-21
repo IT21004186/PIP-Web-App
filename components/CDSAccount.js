@@ -11,7 +11,7 @@ function CDSAccount({ stocks, totals }) {
   }
 
   const sectorOrder = [
-    "Banking",
+    "Banks",
     "Capital Goods",
     "Materials",
     "Consumer Services",
