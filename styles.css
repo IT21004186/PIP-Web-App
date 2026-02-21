@@ -180,9 +180,9 @@ h4 { font-size: 0.9rem; }
    PAGE LAYOUT
    ========================================================= */
 .page-wrapper {
-  max-width: 1400px;
+  max-width: 1600px;
   margin: 0 auto;
-  padding: 28px 24px;
+  padding: 28px 4px;
 }
 
 .page-header {
@@ -830,7 +830,7 @@ tbody tr:last-child td { border-bottom: none; }
 
 @media (max-width: 640px) {
   .navbar { padding: 0 14px; height: 54px; }
-  .page-wrapper { padding: 18px 14px; }
+  .page-wrapper { padding: 18px 8px; }
   .kpi-grid { grid-template-columns: 1fr 1fr; }
   .crypto-grid, .fd-grid { grid-template-columns: 1fr; }
   .fd-stats, .crypto-stats { grid-template-columns: 1fr 1fr; }
