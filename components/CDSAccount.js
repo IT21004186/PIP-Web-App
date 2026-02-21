@@ -150,15 +150,25 @@ function CDSAccount({ stocks, totals }) {
                         <td>
                           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                             {stock.logo
-                              ? <img src={stock.logo} alt={stock.symbol} style={{ width: 28, height: 28, objectFit: "contain" }} />
+                              ? <div style={{
+                                  width: 36, height: 36,
+                                  background: "#ffffff",
+                                  borderRadius: 6,
+                                  padding: 3,
+                                  display: "flex", alignItems: "center", justifyContent: "center",
+                                  flexShrink: 0,
+                                }}>
+                                  <img src={stock.logo} alt={stock.symbol} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                                </div>
                               : <div style={{
-                                  width: 28, height: 28,
+                                  width: 36, height: 36,
                                   background: sectorColor + "22",
                                   border: `1px solid ${sectorColor}44`,
-                                  borderRadius: 4,
+                                  borderRadius: 6,
                                   display: "flex", alignItems: "center", justifyContent: "center",
                                   fontSize: "0.6rem", fontWeight: 800, color: sectorColor,
                                   fontFamily: "monospace",
+                                  flexShrink: 0,
                                 }}>
                                   {stock.symbol.slice(0, 3)}
                                 </div>

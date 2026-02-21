@@ -21,6 +21,20 @@ function Dashboard({ stocks, cryptos, fds, totals }) {
   );
 }
 
+// ── KPI Icon (img with emoji fallback) ────────────────────
+function KPIIcon({ src, fallback }) {
+  const [failed, setFailed] = React.useState(false);
+  if (!src || failed) return <span>{fallback}</span>;
+  return (
+    <img
+      src={src}
+      alt=""
+      style={{ width: "100%", height: "100%", objectFit: "contain" }}
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
 // ── KPI Grid ──────────────────────────────────────────────
 function KPIGrid({ totals }) {
   const plColor = totals.totalPL >= 0 ? "var(--gain)" : "var(--loss)";
@@ -32,7 +46,8 @@ function KPIGrid({ totals }) {
       label: "Total Net Worth",
       value: formatLKRFull(totals.totalNetWorth),
       sub: `${formatLKR(totals.fdTotalPrincipal)} invested in FDs`,
-      icon: "💰",
+      icon: "Assets/net-worth.png",
+      iconFallback: "💰",
       color: "var(--accent)",
       valueClass: "",
     },
@@ -40,7 +55,8 @@ function KPIGrid({ totals }) {
       label: "Total Unrealized P/L",
       value: `${plSign}${formatLKRFull(totals.totalPL)}`,
       sub: `CDS: ${formatLKR(totals.cdsTotalPL)} · Crypto: ${formatLKR(totals.cryptoTotalPL)}`,
-      icon: "📊",
+      icon: "Assets/unrealized-pl.png",
+      iconFallback: "📈",
       color: plColor,
       valueClass: totals.totalPL >= 0 ? "gain" : "loss",
     },
@@ -48,7 +64,8 @@ function KPIGrid({ totals }) {
       label: "Best Performer",
       value: totals.bestStock ? totals.bestStock.symbol : "—",
       sub: totals.bestStock ? `${formatPct(totals.bestStock.plPercent)} · ${totals.bestStock.company}` : "",
-      icon: "🏆",
+      icon: "Assets/best-performer.png",
+      iconFallback: "🏆",
       color: "var(--gain)",
       valueClass: "gain",
     },
@@ -56,7 +73,8 @@ function KPIGrid({ totals }) {
       label: "Worst Performer",
       value: totals.worstStock ? totals.worstStock.symbol : "—",
       sub: totals.worstStock ? `${formatPct(totals.worstStock.plPercent)} · ${totals.worstStock.company}` : "",
-      icon: "📉",
+      icon: "Assets/worst-performer.png",
+      iconFallback: "📉",
       color: "var(--loss)",
       valueClass: totals.worstStock && totals.worstStock.plPercent < 0 ? "loss" : "",
     },
@@ -66,7 +84,9 @@ function KPIGrid({ totals }) {
     <div className="kpi-grid">
       {kpis.map((kpi, i) => (
         <div key={i} className="kpi-card" style={{ "--kpi-color": kpi.color }}>
-          <div className="kpi-icon">{kpi.icon}</div>
+          <div className="kpi-icon">
+            <KPIIcon src={kpi.icon} fallback={kpi.iconFallback} />
+          </div>
           <div className="kpi-label">{kpi.label}</div>
           <div className={`kpi-value ${kpi.valueClass}`}>{kpi.value}</div>
           <div className="kpi-sub">{kpi.sub}</div>

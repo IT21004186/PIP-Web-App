@@ -272,8 +272,13 @@ h4 { font-size: 0.9rem; }
 .kpi-icon {
   position: absolute;
   top: 18px; right: 18px;
+  width: 36px;
+  height: 36px;
   font-size: 1.6rem;
-  opacity: 0.12;
+  opacity: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* =========================================================
@@ -482,7 +487,7 @@ tbody tr:last-child td { border-bottom: none; }
   height: 48px;
   border-radius: 50%;
   object-fit: contain;
-  background: var(--bg-surface);
+  background: #ffffff;
   padding: 6px;
 }
 
@@ -611,7 +616,7 @@ tbody tr:last-child td { border-bottom: none; }
   height: 48px;
   border-radius: var(--radius-sm);
   object-fit: contain;
-  background: var(--bg-surface);
+  background: #ffffff;
   padding: 6px;
 }
 

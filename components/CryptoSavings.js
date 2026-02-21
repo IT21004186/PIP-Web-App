@@ -258,7 +258,7 @@ function CryptoLogoSmall({ asset }) {
   if (!asset.logo || err) {
     return (
       <div style={{
-        width: 28, height: 28, borderRadius: "50%",
+        width: 36, height: 36, borderRadius: "50%",
         background: asset.color + "22", color: asset.color,
         border: `1px solid ${asset.color}44`,
         display: "flex", alignItems: "center", justifyContent: "center",
@@ -270,11 +270,19 @@ function CryptoLogoSmall({ asset }) {
     );
   }
   return (
-    <img
-      src={asset.logo}
-      alt={asset.name}
-      style={{ width: 28, height: 28, borderRadius: "50%", objectFit: "contain" }}
-      onError={() => setErr(true)}
-    />
+    <div style={{
+      width: 36, height: 36, borderRadius: "50%",
+      background: "#ffffff",
+      padding: 3,
+      display: "flex", alignItems: "center", justifyContent: "center",
+      flexShrink: 0,
+    }}>
+      <img
+        src={asset.logo}
+        alt={asset.name}
+        style={{ width: "100%", height: "100%", objectFit: "contain", borderRadius: "50%" }}
+        onError={() => setErr(true)}
+      />
+    </div>
   );
 }
