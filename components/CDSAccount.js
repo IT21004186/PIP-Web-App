@@ -72,6 +72,29 @@ function CDSAccount({ stocks, totals }) {
         ))}
       </div>
 
+      {/* Transaction cost info banner */}
+      <div style={{
+        background: "var(--bg-surface)",
+        border: "1px solid var(--border)",
+        borderRadius: "var(--radius-md)",
+        padding: "10px 18px",
+        marginBottom: 16,
+        display: "flex",
+        alignItems: "center",
+        gap: 20,
+        flexWrap: "wrap",
+        fontSize: "0.78rem",
+        color: "var(--text-secondary)",
+      }}>
+        <span>⚖️ <strong style={{ color: "var(--text-primary)" }}>CSE Transaction Costs Applied</strong></span>
+        <span style={{ color: "var(--border-light)" }}>|</span>
+        <span>Buy Commission: <strong style={{ color: "var(--neutral)" }}>1.12%</strong> (already paid)</span>
+        <span style={{ color: "var(--border-light)" }}>|</span>
+        <span>Sell Commission: <strong style={{ color: "var(--neutral)" }}>1.12%</strong> (up to Rs. 100M) · <strong style={{ color: "var(--neutral)" }}>0.6125%</strong> on balance above Rs. 100M</span>
+        <span style={{ color: "var(--border-light)" }}>|</span>
+        <span>P/L = Net Sale Proceeds − True Cost</span>
+      </div>
+
       <div className="card" style={{ padding: 0, overflow: "hidden" }}>
         <div className="table-wrapper">
           <table>
@@ -80,19 +103,26 @@ function CDSAccount({ stocks, totals }) {
                 <th>Symbol / Company</th>
                 <th>Quantity</th>
                 <th>Avg Buy (LKR)</th>
+                <th>True Cost (LKR)</th>
                 <th>Current Price (LKR)</th>
                 <th>Market Value (LKR)</th>
-                <th>Unrealized P/L (LKR)</th>
+                <th>B.E.S Price (LKR)</th>
+                <th>Est. Sell Cost (LKR)</th>
+                <th>Net Proceeds (LKR)</th>
+                <th>True P/L (LKR)</th>
                 <th>P/L %</th>
               </tr>
             </thead>
             <tbody>
               {allSectors.map(sector => {
-                const sectorStocks = grouped[sector] || [];
-                const sectorValue  = sectorStocks.reduce((s, x) => s + x.marketValue, 0);
-                const sectorPL     = sectorStocks.reduce((s, x) => s + x.unrealizedPL, 0);
-                const sectorColor  = SECTOR_COLORS[sector] || "#888";
-                const isOpen       = !collapsed[sector];
+                const sectorStocks    = grouped[sector] || [];
+                const sectorValue     = sectorStocks.reduce((s, x) => s + x.marketValue, 0);
+                const sectorTrueCost  = sectorStocks.reduce((s, x) => s + x.trueCostBasis, 0);
+                const sectorSellCost  = sectorStocks.reduce((s, x) => s + x.estimatedSellCost, 0);
+                const sectorProceeds  = sectorStocks.reduce((s, x) => s + x.netSaleProceeds, 0);
+                const sectorPL        = sectorStocks.reduce((s, x) => s + x.unrealizedPL, 0);
+                const sectorColor     = SECTOR_COLORS[sector] || "#888";
+                const isOpen          = !collapsed[sector];
 
                 return (
                   <React.Fragment key={sector}>
@@ -102,7 +132,7 @@ function CDSAccount({ stocks, totals }) {
                       className="sector-row"
                       onClick={() => toggleSector(sector)}
                     >
-                      <td colSpan={7}>
+                      <td colSpan={11}>
                         <span className="sector-badge">
                           <span className="sector-color-dot" style={{ background: sectorColor }} />
                           <span>{sector}</span>
@@ -142,12 +172,37 @@ function CDSAccount({ stocks, totals }) {
                           </div>
                         </td>
                         <td>{formatNum(stock.quantity, 0)}</td>
-                        <td>{formatNum(stock.avgBuyPrice, 2)}</td>
+                        <td>{formatNum(stock.avgBuyPrice, 4)}</td>
+                        <td style={{ color: "var(--text-secondary)" }}>
+                          {formatLKRFull(stock.trueCostBasis)}
+                          <div style={{ fontSize: "0.68rem", color: "var(--text-muted)", marginTop: 2 }}>
+                            +{formatLKR(stock.buyCostPaid)} buy fee
+                          </div>
+                        </td>
                         <td style={{ fontWeight: 600 }}>
                           {formatNum(stock.currentPrice, 2)}
                           <PriceChangePip current={stock.currentPrice} avg={stock.avgBuyPrice} />
                         </td>
                         <td style={{ fontWeight: 600 }}>{formatLKRFull(stock.marketValue)}</td>
+                        <td>
+                          <span style={{
+                            fontFamily: "monospace",
+                            fontSize: "0.82rem",
+                            color: stock.currentPrice >= stock.breakEvenPrice ? "var(--gain)" : "var(--loss)",
+                            fontWeight: 600,
+                          }}>
+                            {formatNum(stock.breakEvenPrice, 4)}
+                          </span>
+                          <div style={{ fontSize: "0.67rem", color: "var(--text-muted)", marginTop: 2 }}>
+                            {stock.currentPrice >= stock.breakEvenPrice ? "▲ above B.E.S" : "▼ below B.E.S"}
+                          </div>
+                        </td>
+                        <td style={{ color: "var(--loss)", fontSize: "0.82rem" }}>
+                          {formatLKRFull(stock.estimatedSellCost)}
+                        </td>
+                        <td style={{ fontWeight: 600 }}>
+                          {formatLKRFull(stock.netSaleProceeds)}
+                        </td>
                         <td>
                           <span className={stock.unrealizedPL >= 0 ? "text-gain" : "text-loss"} style={{ fontWeight: 600 }}>
                             {stock.unrealizedPL >= 0 ? "+" : ""}{formatLKRFull(stock.unrealizedPL)}
@@ -164,10 +219,15 @@ function CDSAccount({ stocks, totals }) {
                     {/* Sector subtotal */}
                     {isOpen && (
                       <tr className="subtotal-row">
-                        <td colSpan={4} style={{ textAlign: "right", paddingRight: 14 }}>
-                          <span style={{ color: "var(--text-muted)", fontSize: "0.72rem", marginRight: 8 }}>SECTOR TOTAL</span>
+                        <td colSpan={3} style={{ textAlign: "right", paddingRight: 14 }}>
+                          <span style={{ color: "var(--text-muted)", fontSize: "0.72rem" }}>SECTOR TOTAL</span>
                         </td>
+                        <td style={{ color: "var(--text-secondary)" }}>{formatLKRFull(sectorTrueCost)}</td>
+                        <td></td>
                         <td>{formatLKRFull(sectorValue)}</td>
+                        <td></td>
+                        <td style={{ color: "var(--loss)", fontSize: "0.82rem" }}>{formatLKRFull(sectorSellCost)}</td>
+                        <td>{formatLKRFull(sectorProceeds)}</td>
                         <td>
                           <span className={sectorPL >= 0 ? "text-gain" : "text-loss"} style={{ fontWeight: 600 }}>
                             {sectorPL >= 0 ? "+" : ""}{formatLKRFull(sectorPL)}
@@ -175,7 +235,7 @@ function CDSAccount({ stocks, totals }) {
                         </td>
                         <td>
                           <span className={`badge badge-${sectorPL >= 0 ? "gain" : "loss"}`}>
-                            {formatPct(sectorValue > 0 ? (sectorPL / (sectorValue - sectorPL)) * 100 : 0)}
+                            {formatPct(sectorTrueCost > 0 ? (sectorPL / sectorTrueCost) * 100 : 0)}
                           </span>
                         </td>
                       </tr>
@@ -186,10 +246,15 @@ function CDSAccount({ stocks, totals }) {
 
               {/* Grand total */}
               <tr className="total-row">
-                <td colSpan={4} style={{ textAlign: "right", paddingRight: 14 }}>
+                <td colSpan={3} style={{ textAlign: "right", paddingRight: 14 }}>
                   <span style={{ fontSize: "0.78rem", letterSpacing: "0.07em" }}>PORTFOLIO TOTAL</span>
                 </td>
+                <td>{formatLKRFull(totals.cdsTotalCost)}</td>
+                <td></td>
                 <td>{formatLKRFull(totals.cdsTotalValue)}</td>
+                <td></td>
+                <td style={{ color: "var(--loss)" }}>{formatLKRFull(totals.cdsTotalSellCost)}</td>
+                <td>{formatLKRFull(totals.cdsTotalNetProceeds)}</td>
                 <td>
                   <span className={totals.cdsTotalPL >= 0 ? "text-gain" : "text-loss"} style={{ fontWeight: 700 }}>
                     {totals.cdsTotalPL >= 0 ? "+" : ""}{formatLKRFull(totals.cdsTotalPL)}
@@ -209,17 +274,37 @@ function CDSAccount({ stocks, totals }) {
       {/* Totals strip */}
       <div className="totals-strip">
         <div className="totals-strip-item">
-          <span className="totals-strip-label">Total Invested</span>
+          <span className="totals-strip-label">Raw Cost</span>
+          <span className="totals-strip-value">{formatLKRFull(totals.cdsTotalCostRaw)}</span>
+        </div>
+        <div className="totals-strip-divider" />
+        <div className="totals-strip-item">
+          <span className="totals-strip-label">Buy Commission Paid</span>
+          <span className="totals-strip-value text-loss">{formatLKRFull(totals.cdsTotalBuyCost)}</span>
+        </div>
+        <div className="totals-strip-divider" />
+        <div className="totals-strip-item">
+          <span className="totals-strip-label">True Cost (incl. buy fee)</span>
           <span className="totals-strip-value">{formatLKRFull(totals.cdsTotalCost)}</span>
         </div>
         <div className="totals-strip-divider" />
         <div className="totals-strip-item">
-          <span className="totals-strip-label">Current Value</span>
+          <span className="totals-strip-label">Market Value</span>
           <span className="totals-strip-value">{formatLKRFull(totals.cdsTotalValue)}</span>
         </div>
         <div className="totals-strip-divider" />
         <div className="totals-strip-item">
-          <span className="totals-strip-label">Unrealized P/L</span>
+          <span className="totals-strip-label">Est. Sell Commission</span>
+          <span className="totals-strip-value text-loss">{formatLKRFull(totals.cdsTotalSellCost)}</span>
+        </div>
+        <div className="totals-strip-divider" />
+        <div className="totals-strip-item">
+          <span className="totals-strip-label">Net Proceeds (after sell)</span>
+          <span className="totals-strip-value">{formatLKRFull(totals.cdsTotalNetProceeds)}</span>
+        </div>
+        <div className="totals-strip-divider" />
+        <div className="totals-strip-item">
+          <span className="totals-strip-label">True Realisable P/L</span>
           <span className={`totals-strip-value ${totals.cdsTotalPL >= 0 ? "text-gain" : "text-loss"}`}>
             {totals.cdsTotalPL >= 0 ? "+" : ""}{formatLKRFull(totals.cdsTotalPL)}
           </span>

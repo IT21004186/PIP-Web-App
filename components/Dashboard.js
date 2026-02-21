@@ -243,19 +243,23 @@ function SectorAllocationChart({ totals }) {
 function PerformanceTable({ stocks, cryptos, fds, totals }) {
   const rows = [
     {
-      asset: "CDS Account",
-      type: "Equities",
-      investedValue: formatLKRFull(totals.cdsTotalCost),
-      currentValue:  formatLKRFull(totals.cdsTotalValue),
-      pl:            totals.cdsTotalPL,
-      plPct:         totals.cdsTotalCost > 0 ? ((totals.cdsTotalPL / totals.cdsTotalCost) * 100) : 0,
+      asset:         "CDS Account",
+      type:          "Equities",
+      note:          "incl. 1.12% buy commission",
+      investedValue: formatLKRFull(totals.cdsTotalCost),      // true cost: raw + buy fee
+      currentValue:  formatLKRFull(totals.cdsTotalValue),     // market value
+      netProceeds:   formatLKRFull(totals.cdsTotalNetProceeds), // after est. sell commission
+      pl:            totals.cdsTotalPL,                        // net proceeds − true cost
+      plPct:         totals.cdsTotalCost > 0 ? (totals.cdsTotalPL / totals.cdsTotalCost) * 100 : 0,
       alloc:         totals.totalNetWorth > 0 ? (totals.cdsTotalValue / totals.totalNetWorth) * 100 : 0,
     },
     {
-      asset: "Crypto",
-      type: "Digital Assets",
+      asset:         "Crypto",
+      type:          "Digital Assets",
+      note:          "",
       investedValue: formatLKRFull(totals.cryptoTotalCostLKR),
       currentValue:  formatLKRFull(totals.cryptoTotalLKR),
+      netProceeds:   "—",
       pl:            totals.cryptoTotalPL,
       plPct:         totals.cryptoTotalCostLKR > 0
                        ? (totals.cryptoTotalPL / totals.cryptoTotalCostLKR) * 100
@@ -263,10 +267,12 @@ function PerformanceTable({ stocks, cryptos, fds, totals }) {
       alloc:         totals.totalNetWorth > 0 ? (totals.cryptoTotalLKR / totals.totalNetWorth) * 100 : 0,
     },
     {
-      asset: "Fixed Deposits",
-      type: "Fixed Income",
+      asset:         "Fixed Deposits",
+      type:          "Fixed Income",
+      note:          "",
       investedValue: formatLKRFull(totals.fdTotalPrincipal),
       currentValue:  formatLKRFull(totals.fdTotalMaturity),
+      netProceeds:   "—",
       pl:            totals.fdTotalInterest,
       plPct:         totals.fdTotalPrincipal > 0 ? (totals.fdTotalInterest / totals.fdTotalPrincipal) * 100 : 0,
       alloc:         totals.totalNetWorth > 0 ? (totals.fdTotalMaturity / totals.totalNetWorth) * 100 : 0,
@@ -282,9 +288,10 @@ function PerformanceTable({ stocks, cryptos, fds, totals }) {
             <tr>
               <th>Asset Class</th>
               <th>Type</th>
-              <th>Invested Value</th>
-              <th>Current Value</th>
-              <th>Unrealized P/L</th>
+              <th>True Invested Cost</th>
+              <th>Market Value</th>
+              <th>Net Proceeds (est.)</th>
+              <th>True P/L</th>
               <th>P/L %</th>
               <th>Allocation</th>
             </tr>
@@ -292,10 +299,14 @@ function PerformanceTable({ stocks, cryptos, fds, totals }) {
           <tbody>
             {rows.map((row, i) => (
               <tr key={i}>
-                <td style={{ fontWeight: 600 }}>{row.asset}</td>
+                <td>
+                  <div style={{ fontWeight: 600 }}>{row.asset}</div>
+                  {row.note && <div style={{ fontSize: "0.7rem", color: "var(--text-muted)", marginTop: 2 }}>{row.note}</div>}
+                </td>
                 <td className="text-secondary">{row.type}</td>
                 <td className="text-secondary">{row.investedValue}</td>
                 <td style={{ fontWeight: 600 }}>{row.currentValue}</td>
+                <td style={{ color: "var(--text-secondary)" }}>{row.netProceeds}</td>
                 <td>
                   <span className={row.pl >= 0 ? "text-gain" : "text-loss"} style={{ fontWeight: 600 }}>
                     {row.pl >= 0 ? "+" : ""}{formatLKRFull(row.pl)}
@@ -322,6 +333,7 @@ function PerformanceTable({ stocks, cryptos, fds, totals }) {
               <td colSpan={2} style={{ textAlign: "left" }}>Total Portfolio</td>
               <td>—</td>
               <td>{formatLKRFull(totals.totalNetWorth)}</td>
+              <td>—</td>
               <td>
                 <span className={totals.totalPL >= 0 ? "text-gain" : "text-loss"} style={{ fontWeight: 700 }}>
                   {totals.totalPL >= 0 ? "+" : ""}{formatLKRFull(totals.totalPL)}

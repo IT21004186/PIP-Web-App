@@ -14,15 +14,60 @@ const SECTOR_COLORS = {
 };
 
 // =========================================================
+//  CSE Transaction Cost Rates (effective 28th July 2025)
+//  Source: Colombo Stock Exchange – Transactions up to Rs.100M
+// =========================================================
+const CSE_BUY_RATE  = 0.0112;   // 1.12% — paid on purchase
+const CSE_SELL_RATE = 0.0112;   // 1.12% — paid on sale (up to Rs.100M)
+const CSE_TIER1_CAP = 100_000_000; // Rs. 100 Million threshold
+const CSE_TIER2_RATE = 0.006125;   // 0.6125% for amount above Rs.100M
+
+// Tiered sell commission: 1.12% up to Rs.100M, 0.6125% on the remainder
+function computeSellCommission(saleValue) {
+  if (saleValue <= CSE_TIER1_CAP) {
+    return saleValue * CSE_SELL_RATE;
+  }
+  return (CSE_TIER1_CAP * CSE_SELL_RATE) + ((saleValue - CSE_TIER1_CAP) * CSE_TIER2_RATE);
+}
+
+// =========================================================
 //  Computation helpers (pure functions, no React dependency)
 // =========================================================
 
 function computeStock(stock) {
-  const marketValue  = stock.quantity * stock.currentPrice;
-  const costBasis    = stock.quantity * stock.avgBuyPrice;
-  const unrealizedPL = marketValue - costBasis;
-  const plPercent    = ((stock.currentPrice - stock.avgBuyPrice) / stock.avgBuyPrice) * 100;
-  return { ...stock, marketValue, costBasis, unrealizedPL, plPercent };
+  // Raw market values (price × qty, no commission)
+  const marketValue    = stock.quantity * stock.currentPrice;
+  const costBasis      = stock.quantity * stock.avgBuyPrice;   // raw, no commission
+
+  // Buy side: 1.12% already paid when shares were purchased
+  const buyCostPaid    = costBasis * CSE_BUY_RATE;
+  const trueCostBasis  = costBasis + buyCostPaid;              // actual cash outlay
+
+  // Sell side: commission that would be paid to exit at current price
+  const estimatedSellCost = computeSellCommission(marketValue);
+  const netSaleProceeds   = marketValue - estimatedSellCost;   // cash received after sell
+
+  // True realisable P/L = what you'd get in hand minus what you paid in total
+  const unrealizedPL   = netSaleProceeds - trueCostBasis;
+  const plPercent      = trueCostBasis > 0 ? (unrealizedPL / trueCostBasis) * 100 : 0;
+
+  // Break-Even-Sell (B.E.S) price: the current price at which P/L = 0
+  // netSaleProceeds = marketValue × (1 - SELL_RATE) must equal trueCostBasis
+  // => besPrice × qty × (1 - SELL_RATE) = trueCostBasis
+  const breakEvenPrice = trueCostBasis / (stock.quantity * (1 - CSE_SELL_RATE));
+
+  return {
+    ...stock,
+    marketValue,
+    costBasis,
+    buyCostPaid,
+    trueCostBasis,
+    estimatedSellCost,
+    netSaleProceeds,
+    unrealizedPL,
+    plPercent,
+    breakEvenPrice,
+  };
 }
 
 function computeCrypto(asset, usdToLkr) {
@@ -74,9 +119,14 @@ function groupBySector(stocks) {
 
 // Portfolio totals
 function getPortfolioTotals(stocks, cryptos, fds, usdToLkr) {
-  const cdsTotalValue = stocks.reduce((s, x) => s + x.marketValue, 0);
-  const cdsTotalPL    = stocks.reduce((s, x) => s + x.unrealizedPL, 0);
-  const cdsTotalCost  = stocks.reduce((s, x) => s + x.costBasis, 0);
+  // CDS — use commission-aware values throughout
+  const cdsTotalValue       = stocks.reduce((s, x) => s + x.marketValue, 0);
+  const cdsTotalCostRaw     = stocks.reduce((s, x) => s + x.costBasis, 0);      // raw (no commission)
+  const cdsTotalBuyCost     = stocks.reduce((s, x) => s + x.buyCostPaid, 0);    // 1.12% paid on buy
+  const cdsTotalCost        = stocks.reduce((s, x) => s + x.trueCostBasis, 0);  // real cash outlay
+  const cdsTotalSellCost    = stocks.reduce((s, x) => s + x.estimatedSellCost, 0); // 1.12% to sell
+  const cdsTotalNetProceeds = stocks.reduce((s, x) => s + x.netSaleProceeds, 0);   // after sell commission
+  const cdsTotalPL          = stocks.reduce((s, x) => s + x.unrealizedPL, 0);   // true realisable P/L
 
   const cryptoTotalLKR     = cryptos.reduce((s, x) => s + x.marketValueLKR, 0);
   const cryptoTotalPL      = cryptos.reduce((s, x) => s + x.unrealizedPLLKR, 0);
@@ -96,16 +146,25 @@ function getPortfolioTotals(stocks, cryptos, fds, usdToLkr) {
   const sectorTotals = Object.entries(grouped).map(([sector, items]) => ({
     sector,
     color: SECTOR_COLORS[sector] || "#888",
-    marketValue:  items.reduce((s, x) => s + x.marketValue, 0),
-    unrealizedPL: items.reduce((s, x) => s + x.unrealizedPL, 0),
-    allocationPct: 0,
+    marketValue:       items.reduce((s, x) => s + x.marketValue, 0),
+    trueCostBasis:     items.reduce((s, x) => s + x.trueCostBasis, 0),
+    estimatedSellCost: items.reduce((s, x) => s + x.estimatedSellCost, 0),
+    netSaleProceeds:   items.reduce((s, x) => s + x.netSaleProceeds, 0),
+    unrealizedPL:      items.reduce((s, x) => s + x.unrealizedPL, 0),
+    allocationPct:     0,
   }));
   sectorTotals.forEach(s => {
     s.allocationPct = cdsTotalValue > 0 ? (s.marketValue / cdsTotalValue) * 100 : 0;
   });
 
   return {
-    cdsTotalValue, cdsTotalPL, cdsTotalCost,
+    cdsTotalValue,
+    cdsTotalCostRaw,
+    cdsTotalBuyCost,
+    cdsTotalCost,        // true cost (raw + 1.12% buy commission)
+    cdsTotalSellCost,
+    cdsTotalNetProceeds,
+    cdsTotalPL,          // true realisable P/L after both commissions
     cryptoTotalLKR, cryptoTotalPL, cryptoTotalCostLKR,
     fdTotalPrincipal, fdTotalMaturity, fdTotalInterest,
     totalNetWorth, totalPL,
