@@ -104,7 +104,7 @@ function AssetAllocationChart({ totals }) {
         datasets: [{
           data: assetAllocation.map(a => a.value),
           backgroundColor: assetAllocation.map(a => a.color),
-          borderColor: "var(--bg-card)",
+          borderColor: "#141928",
           borderWidth: 3,
           hoverBorderWidth: 4,
         }],
@@ -123,11 +123,11 @@ function AssetAllocationChart({ totals }) {
                 return ` ${formatLKRFull(val)}  (${pct.toFixed(1)}%)`;
               },
             },
-            backgroundColor: "var(--bg-surface)",
-            borderColor: "var(--border)",
+            backgroundColor: "#1e2740",
+            borderColor: "#263050",
             borderWidth: 1,
-            titleColor: "var(--text-primary)",
-            bodyColor: "var(--text-secondary)",
+            titleColor: "#e8edf5",
+            bodyColor: "#8a9bbf",
             padding: 12,
           },
         },
@@ -198,11 +198,11 @@ function SectorAllocationChart({ totals }) {
                 return ` P/L: ${pl}${formatLKR(s.unrealizedPL)}  (${s.allocationPct.toFixed(1)}% of CDS)`;
               },
             },
-            backgroundColor: "var(--bg-surface)",
-            borderColor: "var(--border)",
+            backgroundColor: "#1e2740",
+            borderColor: "#263050",
             borderWidth: 1,
-            titleColor: "var(--text-primary)",
-            bodyColor: "var(--text-secondary)",
+            titleColor: "#e8edf5",
+            bodyColor: "#8a9bbf",
             padding: 12,
           },
         },
@@ -210,7 +210,7 @@ function SectorAllocationChart({ totals }) {
           x: {
             grid: { color: "rgba(255,255,255,0.04)" },
             ticks: {
-              color: "var(--text-muted)",
+              color: "#8a9bbf",
               font: { size: 11 },
               callback: (val) => formatLKR(val),
             },
@@ -218,7 +218,7 @@ function SectorAllocationChart({ totals }) {
           y: {
             grid: { display: false },
             ticks: {
-              color: "var(--text-secondary)",
+              color: "#8a9bbf",
               font: { size: 12 },
             },
           },
@@ -254,11 +254,11 @@ function PerformanceTable({ stocks, cryptos, fds, totals }) {
     {
       asset: "Crypto",
       type: "Digital Assets",
-      investedValue: formatLKRFull(cryptos.reduce((s, c) => s + c.costBasisUSD * USD_TO_LKR, 0)),
+      investedValue: formatLKRFull(totals.cryptoTotalCostLKR),
       currentValue:  formatLKRFull(totals.cryptoTotalLKR),
       pl:            totals.cryptoTotalPL,
-      plPct:         cryptos.reduce((s, c) => s + c.costBasisUSD * USD_TO_LKR, 0) > 0
-                       ? (totals.cryptoTotalPL / cryptos.reduce((s, c) => s + c.costBasisUSD * USD_TO_LKR, 0)) * 100
+      plPct:         totals.cryptoTotalCostLKR > 0
+                       ? (totals.cryptoTotalPL / totals.cryptoTotalCostLKR) * 100
                        : 0,
       alloc:         totals.totalNetWorth > 0 ? (totals.cryptoTotalLKR / totals.totalNetWorth) * 100 : 0,
     },

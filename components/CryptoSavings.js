@@ -5,7 +5,7 @@
 function CryptoSavings({ cryptos, totals }) {
   const totalCryptoLKR   = totals.cryptoTotalLKR;
   const totalCryptoPLLKR = totals.cryptoTotalPL;
-  const totalCostLKR     = cryptos.reduce((s, c) => s + c.costBasisUSD * USD_TO_LKR, 0);
+  const totalCostLKR     = totals.cryptoTotalCostLKR;
 
   return (
     <div className="page-wrapper">
@@ -30,7 +30,7 @@ function CryptoSavings({ cryptos, totals }) {
       <div className="rate-banner">
         <span>💱</span>
         <span>Exchange Rate:</span>
-        <strong>1 USD = Rs. {formatNum(USD_TO_LKR, 2)}</strong>
+        <strong>1 USD = Rs. {formatNum(totals.usdToLkr, 2)}</strong>
         <span style={{ margin: "0 8px", opacity: 0.4 }}>|</span>
         <span>All crypto prices in</span>
         <strong>USDT</strong>
