@@ -17,6 +17,8 @@ function CDSAccount({ stocks, totals }) {
     "Consumer Services",
     "Health Care Equipment & Services",
     "Diversified Financials",
+    "Food Beverage & Tobacco",
+    "Energy",
   ];
 
   const orderedSectors = sectorOrder.filter(s => grouped[s]);

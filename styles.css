@@ -26,12 +26,14 @@
   --neutral:        #f59e0b;
   --neutral-bg:     rgba(245, 158, 11, 0.1);
 
-  --sector-banking:       #6366f1;
+  --sector-banking:       #153e70;
   --sector-capital:       #8b5cf6;
-  --sector-materials:     #06b6d4;
-  --sector-consumer:      #f59e0b;
-  --sector-healthcare:    #10b981;
-  --sector-diversified:   #3b82f6;
+  --sector-materials:     #7786d9;
+  --sector-consumer:      #fdcb34;
+  --sector-healthcare:    #e44c69;
+  --sector-diversified:   #009e69;
+  --sector-food:          #f39302;
+  --sector-energy:        #7d8385;
 
   --radius-sm:  6px;
   --radius-md:  10px;

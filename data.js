@@ -5,12 +5,14 @@
 // =========================================================
 
 const SECTOR_COLORS = {
-  "Banks":                            "#6366f1",
+  "Banks":                            "#153e70",
   "Capital Goods":                    "#8b5cf6",
-  "Materials":                        "#06b6d4",
-  "Consumer Services":                "#f59e0b",
-  "Health Care Equipment & Services": "#10b981",
-  "Diversified Financials":           "#3b82f6",
+  "Materials":                        "#7786d9",
+  "Consumer Services":                "#fdcb34",
+  "Diversified Financials":           "#009e69",
+  "Health Care Equipment & Services": "#e44c69",
+  "Food Beverage & Tobacco":          "#f39302",
+  "Energy":                           "#7d8385",
 };
 
 // =========================================================
@@ -172,9 +174,9 @@ function getPortfolioTotals(stocks, cryptos, fds, usdToLkr) {
     bestStock, worstStock,
     sectorTotals,
     assetAllocation: [
-      { label: "CDS Stocks",     value: cdsTotalValue,  color: "#3b82f6", pct: totalNetWorth > 0 ? (cdsTotalValue  / totalNetWorth) * 100 : 0 },
-      { label: "Crypto",         value: cryptoTotalLKR, color: "#9945FF", pct: totalNetWorth > 0 ? (cryptoTotalLKR / totalNetWorth) * 100 : 0 },
-      { label: "Fixed Deposits", value: fdTotalMaturity, color: "#f59e0b", pct: totalNetWorth > 0 ? (fdTotalMaturity / totalNetWorth) * 100 : 0 },
+      { label: "CDS Stocks",     value: cdsTotalValue,  color: "#992b2b", pct: totalNetWorth > 0 ? (cdsTotalValue  / totalNetWorth) * 100 : 0 },
+      { label: "Crypto",         value: cryptoTotalLKR, color: "#F0b90b", pct: totalNetWorth > 0 ? (cryptoTotalLKR / totalNetWorth) * 100 : 0 },
+      { label: "Fixed Deposits", value: fdTotalMaturity, color: "#153e70", pct: totalNetWorth > 0 ? (fdTotalMaturity / totalNetWorth) * 100 : 0 },
     ],
   };
 }
