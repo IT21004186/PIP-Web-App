@@ -164,6 +164,7 @@ function getSymbolTransactions(transactions, symbol) {
 function computeSymbolDerived(transactions, currentPrice) {
   let totalShares = 0;
   let costBasis = 0;
+  let rawCostBasis = 0;
   let realizedProfit = 0;
   const sorted = [...(transactions || [])].sort(
     (a, b) => new Date(a.tradeDate) - new Date(b.tradeDate)
@@ -172,20 +173,25 @@ function computeSymbolDerived(transactions, currentPrice) {
   for (const t of sorted) {
     const cseTx = computeTransactionWithCSE(t);
     const status = (cseTx.status || "").toUpperCase();
+    const gross = cseTx.grossAmount ?? (cseTx.shares ?? 0) * (cseTx.avgPrice ?? 0);
     if (status === "BUY") {
       totalShares += cseTx.shares || 0;
       costBasis += cseTx.netAmount;
+      rawCostBasis += gross;
     } else if (status === "SELL") {
       const avgCost = totalShares > 0 ? costBasis / totalShares : 0;
+      const avgRawCost = totalShares > 0 ? rawCostBasis / totalShares : 0;
       const sold = cseTx.shares || 0;
       const costOfSold = sold * avgCost;
       realizedProfit += cseTx.netAmount - costOfSold;
       totalShares -= sold;
       costBasis -= costOfSold;
+      rawCostBasis -= sold * avgRawCost;
     }
   }
 
   const avgHoldingPrice = totalShares > 0 ? costBasis / totalShares : 0;
+  const buyCostPaid = costBasis - rawCostBasis;
   const totalInvestmentValue = totalShares * (currentPrice || 0);
 
   // CSE: Net Proceeds if sold at current price (matches CDS table logic)
@@ -196,6 +202,8 @@ function computeSymbolDerived(transactions, currentPrice) {
   return {
     totalShares,
     costBasis,
+    rawCostBasis,
+    buyCostPaid,
     avgHoldingPrice,
     totalInvestmentValue,
     realizedProfit,
@@ -282,6 +290,43 @@ function getPortfolioTotals(stocks, cryptos, fds, usdToLkr) {
 //  computations, and returns the fully calculated portfolio.
 // =========================================================
 
+// Merge transaction-derived values into stock when transactions exist (single source of truth)
+function applyTransactionDerivedToStock(stock, transactions) {
+  const txList = transactions[stock.symbol];
+  if (!txList || !Array.isArray(txList) || txList.length === 0) return stock;
+
+  const derived = computeSymbolDerived(txList, stock.currentPrice);
+
+  const quantity = derived.totalShares;
+  const trueCostBasis = derived.costBasis;
+  const costBasis = derived.rawCostBasis;
+  const buyCostPaid = derived.buyCostPaid;
+  const marketValue = quantity * (stock.currentPrice || 0);
+  const estimatedSellCost = computeSellCommission(marketValue);
+  const netSaleProceeds = marketValue - estimatedSellCost;
+  const unrealizedPL = netSaleProceeds - trueCostBasis;
+  const plPercent = trueCostBasis > 0 ? (unrealizedPL / trueCostBasis) * 100 : 0;
+  const breakEvenPrice = quantity > 0
+    ? trueCostBasis / (quantity * (1 - CSE_SELL_RATE))
+    : 0;
+  const avgBuyPrice = quantity > 0 ? costBasis / quantity : stock.avgBuyPrice;
+
+  return {
+    ...stock,
+    quantity,
+    avgBuyPrice,
+    costBasis,
+    buyCostPaid,
+    trueCostBasis,
+    marketValue,
+    estimatedSellCost,
+    netSaleProceeds,
+    unrealizedPL,
+    plPercent,
+    breakEvenPrice,
+  };
+}
+
 async function loadPortfolio() {
   const response = await fetch('data.json');
   if (!response.ok) {
@@ -289,11 +334,13 @@ async function loadPortfolio() {
   }
   const raw = await response.json();
 
-  const stocks       = raw.stocks.map(computeStock);
-  const cryptos      = raw.crypto.map(s => computeCrypto(s, raw.usdToLkr));
-  const fds          = raw.fixedDeposits.map(computeFD);
-  const totals       = getPortfolioTotals(stocks, cryptos, fds, raw.usdToLkr);
   const transactions = raw.transactions && typeof raw.transactions === "object" ? raw.transactions : {};
+  const stocks = raw.stocks
+    .map(computeStock)
+    .map(s => applyTransactionDerivedToStock(s, transactions));
+  const cryptos = raw.crypto.map(s => computeCrypto(s, raw.usdToLkr));
+  const fds = raw.fixedDeposits.map(computeFD);
+  const totals = getPortfolioTotals(stocks, cryptos, fds, raw.usdToLkr);
 
   return { stocks, cryptos, fds, totals, transactions, usdToLkr: raw.usdToLkr };
 }
