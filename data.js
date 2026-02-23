@@ -32,6 +32,36 @@ function computeSellCommission(saleValue) {
   return (CSE_TIER1_CAP * CSE_SELL_RATE) + ((saleValue - CSE_TIER1_CAP) * CSE_TIER2_RATE);
 }
 
+// Compute CSE commission for a single transaction (BUY or SELL)
+function computeTransactionCommission(tx) {
+  const gross = tx.grossAmount ?? (tx.shares ?? 0) * (tx.avgPrice ?? 0);
+  const status = (tx.status || "").toUpperCase();
+  if (status === "BUY") {
+    return gross * CSE_BUY_RATE;  // 1.12%
+  }
+  if (status === "SELL") {
+    return computeSellCommission(gross);  // tiered
+  }
+  return 0;
+}
+
+// Derive netAmount using CSE commission rules (BUY: pay more, SELL: receive less)
+function deriveNetAmount(tx) {
+  const gross = tx.grossAmount ?? (tx.shares ?? 0) * (tx.avgPrice ?? 0);
+  const commission = computeTransactionCommission(tx);
+  const status = (tx.status || "").toUpperCase();
+  if (status === "BUY") return gross + commission;
+  if (status === "SELL") return gross - commission;
+  return gross;
+}
+
+// Apply CSE commission logic to a transaction; returns tx with computed commission and netAmount
+function computeTransactionWithCSE(tx) {
+  const commission = computeTransactionCommission(tx);
+  const netAmount = deriveNetAmount(tx);
+  return { ...tx, commission, netAmount };
+}
+
 // =========================================================
 //  Computation helpers (pure functions, no React dependency)
 // =========================================================
@@ -140,15 +170,16 @@ function computeSymbolDerived(transactions, currentPrice) {
   );
 
   for (const t of sorted) {
-    const status = (t.status || "").toUpperCase();
+    const cseTx = computeTransactionWithCSE(t);
+    const status = (cseTx.status || "").toUpperCase();
     if (status === "BUY") {
-      totalShares += t.shares || 0;
-      costBasis += t.netAmount || 0;
+      totalShares += cseTx.shares || 0;
+      costBasis += cseTx.netAmount;
     } else if (status === "SELL") {
       const avgCost = totalShares > 0 ? costBasis / totalShares : 0;
-      const sold = t.shares || 0;
+      const sold = cseTx.shares || 0;
       const costOfSold = sold * avgCost;
-      realizedProfit += (t.netAmount || 0) - costOfSold;
+      realizedProfit += cseTx.netAmount - costOfSold;
       totalShares -= sold;
       costBasis -= costOfSold;
     }
@@ -157,12 +188,21 @@ function computeSymbolDerived(transactions, currentPrice) {
   const avgHoldingPrice = totalShares > 0 ? costBasis / totalShares : 0;
   const totalInvestmentValue = totalShares * (currentPrice || 0);
 
+  // CSE: Net Proceeds if sold at current price (matches CDS table logic)
+  const marketValue = totalInvestmentValue;
+  const estimatedSellCost = computeSellCommission(marketValue);
+  const netSaleProceeds = marketValue - estimatedSellCost;
+
   return {
     totalShares,
     costBasis,
     avgHoldingPrice,
     totalInvestmentValue,
     realizedProfit,
+    marketValue,
+    estimatedSellCost,
+    netSaleProceeds,
+    unrealizedPL: netSaleProceeds - costBasis,
   };
 }
 

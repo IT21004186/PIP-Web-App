@@ -992,6 +992,12 @@ tbody tr:last-child td { border-bottom: none; }
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
+.transaction-table-cse-banner {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
 .transaction-table-title {
   font-size: 0.9rem;
   font-weight: 600;

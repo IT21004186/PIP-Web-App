@@ -20,6 +20,9 @@ function TransactionTable({ transactions, derived }) {
 
   return (
     <div className="card transaction-table-card">
+      <div className="transaction-table-cse-banner">
+        <span>CSE Transaction Costs: Buy 1.12% | Sell 1.12% (up to Rs.100M) · 0.6125% above</span>
+      </div>
       <h3 className="transaction-table-title">Transaction History</h3>
       <div className="table-wrapper transaction-table-wrapper">
         <table className="transaction-table">
@@ -43,20 +46,21 @@ function TransactionTable({ transactions, derived }) {
               </tr>
             ) : (
               sorted.map((tx, idx) => {
-                const isBuy = (tx.status || "").toUpperCase() === "BUY";
+                const cseTx = computeTransactionWithCSE(tx);
+                const isBuy = (cseTx.status || "").toUpperCase() === "BUY";
                 return (
                   <tr key={idx} className="transaction-table-row">
-                    <td>{formatDate(tx.tradeDate)}</td>
-                    <td>{formatNum(tx.shares ?? 0, 0)}</td>
-                    <td>{formatLKRFull(tx.avgPrice ?? 0)}</td>
-                    <td>{formatLKRFull(tx.grossAmount ?? 0)}</td>
-                    <td>{formatLKRFull(tx.commission ?? 0)}</td>
-                    <td>{formatLKRFull(tx.netAmount ?? 0)}</td>
+                    <td>{formatDate(cseTx.tradeDate)}</td>
+                    <td>{formatNum(cseTx.shares ?? 0, 0)}</td>
+                    <td>{formatLKRFull(cseTx.avgPrice ?? 0)}</td>
+                    <td>{formatLKRFull(cseTx.grossAmount ?? 0)}</td>
+                    <td>{formatLKRFull(cseTx.commission)}</td>
+                    <td>{formatLKRFull(cseTx.netAmount)}</td>
                     <td>
                       <span
                         className={`badge badge-${isBuy ? "gain" : "loss"}`}
                       >
-                        {tx.status || "—"}
+                        {cseTx.status || "—"}
                       </span>
                     </td>
                   </tr>
@@ -90,6 +94,27 @@ function TransactionTable({ transactions, derived }) {
           </div>
           <div className="transaction-derived-divider" />
           <div className="transaction-derived-item">
+            <span className="transaction-derived-label">True Cost (LKR)</span>
+            <span className="transaction-derived-value">
+              {formatLKRFull(derived.costBasis ?? 0)}
+            </span>
+          </div>
+          <div className="transaction-derived-divider" />
+          <div className="transaction-derived-item">
+            <span className="transaction-derived-label">Est. Sell Cost (LKR)</span>
+            <span className="transaction-derived-value text-loss">
+              {formatLKRFull(derived.estimatedSellCost ?? 0)}
+            </span>
+          </div>
+          <div className="transaction-derived-divider" />
+          <div className="transaction-derived-item">
+            <span className="transaction-derived-label">Net Proceeds (LKR)</span>
+            <span className="transaction-derived-value">
+              {formatLKRFull(derived.netSaleProceeds ?? 0)}
+            </span>
+          </div>
+          <div className="transaction-derived-divider" />
+          <div className="transaction-derived-item">
             <span className="transaction-derived-label">Realized Profit</span>
             <span
               className={`transaction-derived-value ${
@@ -98,6 +123,18 @@ function TransactionTable({ transactions, derived }) {
             >
               {(derived.realizedProfit ?? 0) >= 0 ? "+" : ""}
               {formatLKRFull(derived.realizedProfit ?? 0)}
+            </span>
+          </div>
+          <div className="transaction-derived-divider" />
+          <div className="transaction-derived-item">
+            <span className="transaction-derived-label">Unrealized P/L</span>
+            <span
+              className={`transaction-derived-value ${
+                (derived.unrealizedPL ?? 0) >= 0 ? "text-gain" : "text-loss"
+              }`}
+            >
+              {(derived.unrealizedPL ?? 0) >= 0 ? "+" : ""}
+              {formatLKRFull(derived.unrealizedPL ?? 0)}
             </span>
           </div>
         </div>
