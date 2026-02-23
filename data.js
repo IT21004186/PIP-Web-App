@@ -32,6 +32,36 @@ function computeSellCommission(saleValue) {
   return (CSE_TIER1_CAP * CSE_SELL_RATE) + ((saleValue - CSE_TIER1_CAP) * CSE_TIER2_RATE);
 }
 
+// Compute CSE commission for a single transaction (BUY or SELL)
+function computeTransactionCommission(tx) {
+  const gross = tx.grossAmount ?? (tx.shares ?? 0) * (tx.avgPrice ?? 0);
+  const status = (tx.status || "").toUpperCase();
+  if (status === "BUY") {
+    return gross * CSE_BUY_RATE;  // 1.12%
+  }
+  if (status === "SELL") {
+    return computeSellCommission(gross);  // tiered
+  }
+  return 0;
+}
+
+// Derive netAmount using CSE commission rules (BUY: pay more, SELL: receive less)
+function deriveNetAmount(tx) {
+  const gross = tx.grossAmount ?? (tx.shares ?? 0) * (tx.avgPrice ?? 0);
+  const commission = computeTransactionCommission(tx);
+  const status = (tx.status || "").toUpperCase();
+  if (status === "BUY") return gross + commission;
+  if (status === "SELL") return gross - commission;
+  return gross;
+}
+
+// Apply CSE commission logic to a transaction; returns tx with computed commission and netAmount
+function computeTransactionWithCSE(tx) {
+  const commission = computeTransactionCommission(tx);
+  const netAmount = deriveNetAmount(tx);
+  return { ...tx, commission, netAmount };
+}
+
 // =========================================================
 //  Computation helpers (pure functions, no React dependency)
 // =========================================================
@@ -107,6 +137,72 @@ function computeFD(fd) {
     interestEarned,
     accruedInterest,
     isMatured,
+  };
+}
+
+// =========================================================
+//  Symbol Profile helpers
+// =========================================================
+
+function getSymbolProfile(stocks, symbol) {
+  const stock = stocks.find(s => s.symbol === symbol);
+  if (!stock) return null;
+  return {
+    symbol: stock.symbol,
+    company: stock.company,
+    sector: stock.sector,
+    currentPrice: stock.currentPrice,
+    logo: stock.logo,
+  };
+}
+
+function getSymbolTransactions(transactions, symbol) {
+  if (!transactions || typeof transactions !== "object") return [];
+  return transactions[symbol] || [];
+}
+
+function computeSymbolDerived(transactions, currentPrice) {
+  let totalShares = 0;
+  let costBasis = 0;
+  let realizedProfit = 0;
+  const sorted = [...(transactions || [])].sort(
+    (a, b) => new Date(a.tradeDate) - new Date(b.tradeDate)
+  );
+
+  for (const t of sorted) {
+    const cseTx = computeTransactionWithCSE(t);
+    const status = (cseTx.status || "").toUpperCase();
+    if (status === "BUY") {
+      totalShares += cseTx.shares || 0;
+      costBasis += cseTx.netAmount;
+    } else if (status === "SELL") {
+      const avgCost = totalShares > 0 ? costBasis / totalShares : 0;
+      const sold = cseTx.shares || 0;
+      const costOfSold = sold * avgCost;
+      realizedProfit += cseTx.netAmount - costOfSold;
+      totalShares -= sold;
+      costBasis -= costOfSold;
+    }
+  }
+
+  const avgHoldingPrice = totalShares > 0 ? costBasis / totalShares : 0;
+  const totalInvestmentValue = totalShares * (currentPrice || 0);
+
+  // CSE: Net Proceeds if sold at current price (matches CDS table logic)
+  const marketValue = totalInvestmentValue;
+  const estimatedSellCost = computeSellCommission(marketValue);
+  const netSaleProceeds = marketValue - estimatedSellCost;
+
+  return {
+    totalShares,
+    costBasis,
+    avgHoldingPrice,
+    totalInvestmentValue,
+    realizedProfit,
+    marketValue,
+    estimatedSellCost,
+    netSaleProceeds,
+    unrealizedPL: netSaleProceeds - costBasis,
   };
 }
 
@@ -193,10 +289,11 @@ async function loadPortfolio() {
   }
   const raw = await response.json();
 
-  const stocks  = raw.stocks.map(computeStock);
-  const cryptos = raw.crypto.map(s => computeCrypto(s, raw.usdToLkr));
-  const fds     = raw.fixedDeposits.map(computeFD);
-  const totals  = getPortfolioTotals(stocks, cryptos, fds, raw.usdToLkr);
+  const stocks       = raw.stocks.map(computeStock);
+  const cryptos      = raw.crypto.map(s => computeCrypto(s, raw.usdToLkr));
+  const fds          = raw.fixedDeposits.map(computeFD);
+  const totals       = getPortfolioTotals(stocks, cryptos, fds, raw.usdToLkr);
+  const transactions = raw.transactions && typeof raw.transactions === "object" ? raw.transactions : {};
 
-  return { stocks, cryptos, fds, totals, usdToLkr: raw.usdToLkr };
+  return { stocks, cryptos, fds, totals, transactions, usdToLkr: raw.usdToLkr };
 }

@@ -755,6 +755,11 @@ tbody tr:last-child td { border-bottom: none; }
 
 .stock-company { color: var(--text-secondary); font-size: 0.82rem; }
 
+.stock-symbol-clickable:hover .stock-symbol-pill {
+  background: var(--accent-glow);
+  border-color: var(--accent);
+}
+
 /* =========================================================
    SECTION DIVIDER
    ========================================================= */
@@ -826,6 +831,288 @@ tbody tr:last-child td { border-bottom: none; }
 .font-bold { font-weight: 700; }
 .font-semibold { font-weight: 600; }
 .opacity-60 { opacity: 0.6; }
+
+/* =========================================================
+   SYMBOL PROFILE PAGE (light theme, CSE-style)
+   ========================================================= */
+.symbol-profile-page {
+  background: #f0f4f9;
+}
+
+.symbol-profile-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  font-size: 0.85rem;
+}
+
+.symbol-profile-back {
+  background: none;
+  border: none;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: inherit;
+  padding: 0;
+  text-decoration: none;
+}
+
+.symbol-profile-back:hover {
+  text-decoration: underline;
+}
+
+.symbol-profile-breadcrumb-sep {
+  color: #6b7280;
+}
+
+.symbol-profile-breadcrumb-symbol {
+  font-weight: 700;
+  color: #111827;
+}
+
+.symbol-profile-error {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--text-secondary);
+}
+
+.symbol-profile-error p {
+  margin-bottom: 16px;
+}
+
+/* Symbol Header (light gradient, logo left, details right) */
+.symbol-header {
+  background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 50%, #f0f4f9 100%);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: var(--radius-lg);
+  padding: 28px 32px;
+  margin-bottom: 24px;
+}
+
+.symbol-header-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
+.symbol-header-logo-card {
+  width: 80px;
+  height: 80px;
+  background: #ffffff;
+  border-radius: var(--radius-md);
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.symbol-header-logo-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.symbol-header-logo-placeholder {
+  width: 80px;
+  height: 80px;
+  background: #e5e7eb;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #6b7280;
+  font-family: monospace;
+}
+
+.symbol-header-details {
+  flex: 1;
+  min-width: 200px;
+}
+
+.symbol-header-company {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 8px 0;
+  letter-spacing: 0.02em;
+}
+
+.symbol-header-meta {
+  font-size: 0.82rem;
+  color: #6b7280;
+  margin-bottom: 16px;
+}
+
+.symbol-header-sep {
+  margin: 0 8px;
+}
+
+.symbol-header-price-block {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.symbol-header-price-main {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: var(--radius-md);
+  padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.symbol-header-price-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.symbol-header-price-label {
+  font-size: 0.72rem;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Transaction Table Card */
+.transaction-table-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+}
+
+.symbol-profile-page .transaction-table-card {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.transaction-table-cse-banner {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+.transaction-table-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 16px 0;
+  letter-spacing: 0.05em;
+}
+
+.transaction-table-wrapper {
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+}
+
+.transaction-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.transaction-table thead th {
+  background: #f3f4f6;
+  color: #6b7280;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 12px 14px;
+  text-align: right;
+  white-space: nowrap;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.transaction-table thead th:first-child {
+  text-align: left;
+}
+
+.transaction-table tbody td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #f3f4f6;
+  text-align: right;
+  color: #374151;
+}
+
+.transaction-table tbody td:first-child {
+  text-align: left;
+}
+
+.transaction-table-row:hover td {
+  background: #f9fafb;
+}
+
+.transaction-table-empty {
+  text-align: center;
+  color: #9ca3af;
+  padding: 32px;
+}
+
+.transaction-derived-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.transaction-derived-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.transaction-derived-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #6b7280;
+}
+
+.transaction-derived-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.transaction-derived-divider {
+  width: 1px;
+  height: 32px;
+  background: #e5e7eb;
+}
+
+/* Responsive: Symbol Profile */
+@media (max-width: 640px) {
+  .symbol-header-inner {
+    flex-direction: column;
+  }
+
+  .symbol-header-price-main .symbol-header-price-value {
+    font-size: 1.3rem;
+  }
+
+  .transaction-derived-strip {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .transaction-derived-divider {
+    width: 100%;
+    height: 1px;
+  }
+}
 
 /* =========================================================
    RESPONSIVE

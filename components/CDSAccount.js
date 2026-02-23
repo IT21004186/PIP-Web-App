@@ -2,7 +2,7 @@
 //  CDS Account Component
 // =========================================================
 
-function CDSAccount({ stocks, totals }) {
+function CDSAccount({ stocks, totals, onSymbolClick }) {
   const grouped = groupBySector(stocks);
   const [collapsed, setCollapsed] = React.useState({});
 
@@ -150,7 +150,19 @@ function CDSAccount({ stocks, totals }) {
                     {isOpen && sectorStocks.map(stock => (
                       <tr key={stock.symbol}>
                         <td>
-                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <div
+                            className={onSymbolClick ? "stock-symbol-clickable" : ""}
+                          style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 10,
+                              cursor: onSymbolClick ? "pointer" : "default",
+                            }}
+                            onClick={onSymbolClick ? () => onSymbolClick(stock.symbol) : undefined}
+                            onKeyDown={onSymbolClick ? (e) => e.key === "Enter" && onSymbolClick(stock.symbol) : undefined}
+                            role={onSymbolClick ? "button" : undefined}
+                            tabIndex={onSymbolClick ? 0 : undefined}
+                          >
                             {stock.logo
                               ? <div style={{
                                   width: 36, height: 36,
