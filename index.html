@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PIP &mdash; Personal Investment Portfolio</title>
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <!-- React & ReactDOM -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <!-- Babel for JSX -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- Data -->
+  <script src="data.js"></script>
+
+  <!-- Components (loaded in dependency order) -->
+  <script type="text/babel" src="components/Navbar.js"></script>
+  <script type="text/babel" src="components/Dashboard.js"></script>
+  <script type="text/babel" src="components/CDSAccount.js"></script>
+  <script type="text/babel" src="components/CryptoSavings.js"></script>
+  <script type="text/babel" src="components/FixedDeposits.js"></script>
+
+  <!-- App entry point -->
+  <script type="text/babel" src="app.js"></script>
+</body>
+</html>

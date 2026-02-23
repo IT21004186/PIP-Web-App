@@ -1,0 +1,5 @@
+# Personal portfolio data — contains private financial data, do not commit
+data.json
+
+# Debug logs
+debug-*.log
