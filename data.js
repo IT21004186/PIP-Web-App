@@ -110,6 +110,62 @@ function computeFD(fd) {
   };
 }
 
+// =========================================================
+//  Symbol Profile helpers
+// =========================================================
+
+function getSymbolProfile(stocks, symbol) {
+  const stock = stocks.find(s => s.symbol === symbol);
+  if (!stock) return null;
+  return {
+    symbol: stock.symbol,
+    company: stock.company,
+    sector: stock.sector,
+    currentPrice: stock.currentPrice,
+    logo: stock.logo,
+  };
+}
+
+function getSymbolTransactions(transactions, symbol) {
+  if (!transactions || typeof transactions !== "object") return [];
+  return transactions[symbol] || [];
+}
+
+function computeSymbolDerived(transactions, currentPrice) {
+  let totalShares = 0;
+  let costBasis = 0;
+  let realizedProfit = 0;
+  const sorted = [...(transactions || [])].sort(
+    (a, b) => new Date(a.tradeDate) - new Date(b.tradeDate)
+  );
+
+  for (const t of sorted) {
+    const status = (t.status || "").toUpperCase();
+    if (status === "BUY") {
+      totalShares += t.shares || 0;
+      costBasis += t.netAmount || 0;
+    } else if (status === "SELL") {
+      const avgCost = totalShares > 0 ? costBasis / totalShares : 0;
+      const sold = t.shares || 0;
+      const costOfSold = sold * avgCost;
+      realizedProfit += (t.netAmount || 0) - costOfSold;
+      totalShares -= sold;
+      costBasis -= costOfSold;
+    }
+  }
+
+  const avgHoldingPrice = totalShares > 0 ? costBasis / totalShares : 0;
+  const totalInvestmentValue = totalShares * (currentPrice || 0);
+
+  return {
+    totalShares,
+    costBasis,
+    avgHoldingPrice,
+    totalInvestmentValue,
+    realizedProfit,
+  };
+}
+
 // Sector grouping helper
 function groupBySector(stocks) {
   return stocks.reduce((acc, stock) => {
@@ -193,10 +249,11 @@ async function loadPortfolio() {
   }
   const raw = await response.json();
 
-  const stocks  = raw.stocks.map(computeStock);
-  const cryptos = raw.crypto.map(s => computeCrypto(s, raw.usdToLkr));
-  const fds     = raw.fixedDeposits.map(computeFD);
-  const totals  = getPortfolioTotals(stocks, cryptos, fds, raw.usdToLkr);
+  const stocks       = raw.stocks.map(computeStock);
+  const cryptos      = raw.crypto.map(s => computeCrypto(s, raw.usdToLkr));
+  const fds          = raw.fixedDeposits.map(computeFD);
+  const totals       = getPortfolioTotals(stocks, cryptos, fds, raw.usdToLkr);
+  const transactions = raw.transactions && typeof raw.transactions === "object" ? raw.transactions : {};
 
-  return { stocks, cryptos, fds, totals, usdToLkr: raw.usdToLkr };
+  return { stocks, cryptos, fds, totals, transactions, usdToLkr: raw.usdToLkr };
 }

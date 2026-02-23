@@ -59,8 +59,9 @@ function ErrorScreen({ message }) {
 
 function App() {
   const [portfolio, setPortfolio] = useState(null);
-  const [error, setError]         = useState(null);
+  const [error, setError] = useState(null);
   const [activePage, setActivePage] = useState("dashboard");
+  const [selectedSymbol, setSelectedSymbol] = useState(null);
 
   useEffect(() => {
     loadPortfolio()
@@ -68,24 +69,40 @@ function App() {
       .catch(err => setError(err.message));
   }, []);
 
-  if (error)     return <ErrorScreen message={error} />;
+  function handleNavigate(page) {
+    setActivePage(page);
+    setSelectedSymbol(null);
+  }
+
+  function handleSymbolClick(symbol) {
+    setActivePage("symbol");
+    setSelectedSymbol(symbol);
+  }
+
+  function handleSymbolBack() {
+    setActivePage("cds");
+    setSelectedSymbol(null);
+  }
+
+  if (error) return <ErrorScreen message={error} />;
   if (!portfolio) return <LoadingScreen />;
 
-  const { stocks, cryptos, fds, totals } = portfolio;
+  const { stocks, cryptos, fds, totals, transactions } = portfolio;
 
   function renderPage() {
     switch (activePage) {
       case "dashboard": return <Dashboard stocks={stocks} cryptos={cryptos} fds={fds} totals={totals} />;
-      case "cds":       return <CDSAccount stocks={stocks} totals={totals} />;
+      case "cds":       return <CDSAccount stocks={stocks} totals={totals} onSymbolClick={handleSymbolClick} />;
       case "crypto":    return <CryptoSavings cryptos={cryptos} totals={totals} />;
       case "fd":        return <FixedDeposits fds={fds} totals={totals} />;
+      case "symbol":    return <SymbolProfile symbol={selectedSymbol} stocks={stocks} transactions={transactions} onBack={handleSymbolBack} />;
       default:          return <Dashboard stocks={stocks} cryptos={cryptos} fds={fds} totals={totals} />;
     }
   }
 
   return (
     <div>
-      <Navbar activePage={activePage} onNavigate={setActivePage} totals={totals} />
+      <Navbar activePage={activePage} onNavigate={handleNavigate} totals={totals} />
       <main>{renderPage()}</main>
     </div>
   );
