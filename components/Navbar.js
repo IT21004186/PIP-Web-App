@@ -17,7 +17,9 @@ function Navbar({ activePage, onNavigate, totals }) {
   return (
     <nav className="navbar">
       <div className="navbar-brand">
-        <div className="brand-icon">P</div>
+        <div className="brand-icon">
+          <img src="Assets/favicon.ico" alt="PIP" />
+        </div>
         <div>
           <span>PIP</span>
           <span className="brand-sub">Portfolio Tracker</span>
