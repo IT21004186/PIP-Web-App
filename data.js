@@ -286,6 +286,40 @@ function getPortfolioTotals(stocks, cryptos, fds, usdToLkr) {
 }
 
 // =========================================================
+//  USD to LKR exchange rate — ExchangeRate-API (open access)
+//  https://open.er-api.com/v6/latest/USD
+// =========================================================
+const EXCHANGE_API = 'https://open.er-api.com/v6/latest/USD';
+const CACHE_KEY = 'pip_usd_lkr';
+const CACHE_TS_KEY = 'pip_usd_lkr_ts';
+
+async function fetchUsdToLkr() {
+  const now = Date.now() / 1000;
+  const cachedRate = localStorage.getItem(CACHE_KEY);
+  const cachedTs = localStorage.getItem(CACHE_TS_KEY);
+
+  if (cachedRate && cachedTs && now < parseFloat(cachedTs)) {
+    const rate = parseFloat(cachedRate);
+    if (!isNaN(rate) && rate > 0) return rate;
+  }
+
+  try {
+    const r = await fetch(EXCHANGE_API);
+    const j = await r.json();
+    if (j.result === 'success' && j.rates?.LKR) {
+      const rate = j.rates.LKR;
+      const nextUpdate = j.time_next_update_unix || now + 86400;
+      localStorage.setItem(CACHE_KEY, String(rate));
+      localStorage.setItem(CACHE_TS_KEY, String(nextUpdate));
+      return rate;
+    }
+  } catch (_) {
+    /* fallback to data.json */
+  }
+  return null;
+}
+
+// =========================================================
 //  Async portfolio loader — fetches data.json, runs all
 //  computations, and returns the fully calculated portfolio.
 // =========================================================
@@ -328,19 +362,23 @@ function applyTransactionDerivedToStock(stock, transactions) {
 }
 
 async function loadPortfolio() {
-  const response = await fetch('data.json');
-  if (!response.ok) {
-    throw new Error(`Failed to load data.json: ${response.status} ${response.statusText}`);
-  }
-  const raw = await response.json();
+  const [raw, liveRate] = await Promise.all([
+    fetch('data.json').then(r => {
+      if (!r.ok) throw new Error(`Failed to load data.json: ${r.status} ${r.statusText}`);
+      return r.json();
+    }),
+    fetchUsdToLkr(),
+  ]);
+
+  const usdToLkr = liveRate ?? raw.usdToLkr ?? 308.71;
 
   const transactions = raw.transactions && typeof raw.transactions === "object" ? raw.transactions : {};
   const stocks = raw.stocks
     .map(computeStock)
     .map(s => applyTransactionDerivedToStock(s, transactions));
-  const cryptos = raw.crypto.map(s => computeCrypto(s, raw.usdToLkr));
+  const cryptos = raw.crypto.map(s => computeCrypto(s, usdToLkr));
   const fds = raw.fixedDeposits.map(computeFD);
-  const totals = getPortfolioTotals(stocks, cryptos, fds, raw.usdToLkr);
+  const totals = getPortfolioTotals(stocks, cryptos, fds, usdToLkr);
 
-  return { stocks, cryptos, fds, totals, transactions, usdToLkr: raw.usdToLkr };
+  return { stocks, cryptos, fds, totals, transactions, usdToLkr };
 }

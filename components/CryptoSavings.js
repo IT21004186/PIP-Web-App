@@ -36,6 +36,10 @@ function CryptoSavings({ cryptos, totals }) {
         <strong>USDT</strong>
         <span style={{ margin: "0 8px", opacity: 0.4 }}>|</span>
         <span>LKR equivalents calculated at current rate</span>
+        <span style={{ margin: "0 8px", opacity: 0.4 }}>|</span>
+        <a href="https://www.exchangerate-api.com" target="_blank" rel="noopener noreferrer" style={{ fontSize: "0.72rem", opacity: 0.7, color: "inherit", textDecoration: "none" }}>
+          Rates by Exchange Rate API
+        </a>
       </div>
 
       {/* Crypto cards */}
