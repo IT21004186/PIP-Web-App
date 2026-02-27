@@ -1,8 +1,50 @@
 // =========================================================
 //  Symbol Header Component
 //  Section 1: Company logo (left), basic details (right)
+//  Section 2: Optional statistics grid (when data is present)
 //  Reusable for any stock symbol
 // =========================================================
+
+const STATS_CONFIG = [
+  { key: "marketCap",        label: "Market Cap (LKR)",  format: "lkr-full",  wide: true },
+  { key: "issuedQuantity",   label: "Issued Quantity",   format: "number"    },
+  { key: "eps",              label: "EPS (LKR)",         format: "decimal2"  },
+  { key: "nav",              label: "NAV (LKR)",         format: "decimal2"  },
+  { key: "dividendPerShare", label: "Dividend / Share",  format: "decimal2"  },
+  { key: "peRatio",          label: "P/E Ratio",         format: "decimal2"  },
+  { key: "pbv",              label: "PBV",               format: "decimal2"  },
+  { key: "dividendYield",    label: "Dividend Yield",    format: "pct"       },
+  { key: "roe",              label: "ROE",               format: "pct"       },
+];
+
+function formatStatValue(value, format) {
+  if (value === null || value === undefined) return "—";
+  switch (format) {
+    case "lkr-full":  return formatLKRFull(value);
+    case "number":    return value.toLocaleString();
+    case "decimal2":  return formatNum(value, 2);
+    case "pct":       return formatNum(value, 2) + "%";
+    default:          return String(value);
+  }
+}
+
+function SymbolStats({ symbolData }) {
+  const visibleStats = STATS_CONFIG.filter(s => symbolData[s.key] !== null && symbolData[s.key] !== undefined);
+  if (visibleStats.length === 0) return null;
+
+  return (
+    <div className="symbol-header-stats">
+      <div className="symbol-header-stats-grid">
+        {visibleStats.map(stat => (
+          <div key={stat.key} className={`symbol-stat-tile${stat.wide ? " symbol-stat-tile--wide" : ""}`}>
+            <div className="symbol-stat-label">{stat.label}</div>
+            <div className="symbol-stat-value">{formatStatValue(symbolData[stat.key], stat.format)}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function SymbolHeader({ symbolData }) {
   if (!symbolData) return null;
@@ -40,6 +82,7 @@ function SymbolHeader({ symbolData }) {
           </div>
         </div>
       </div>
+      <SymbolStats symbolData={symbolData} />
     </div>
   );
 }

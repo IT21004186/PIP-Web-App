@@ -153,6 +153,15 @@ function getSymbolProfile(stocks, symbol) {
     sector: stock.sector,
     currentPrice: stock.currentPrice,
     logo: stock.logo,
+    marketCap:        stock.marketCap,
+    issuedQuantity:   stock.issuedQuantity,
+    eps:              stock.eps,
+    nav:              stock.nav,
+    dividendPerShare: stock.dividendPerShare,
+    peRatio:          stock.peRatio,
+    pbv:              stock.pbv,
+    dividendYield:    stock.dividendYield,
+    roe:              stock.roe,
   };
 }
 
