@@ -16,7 +16,7 @@ Single-page web application for a Sri Lankan investor to track wealth across Col
 
 - **Dashboard:** Total Net Worth, Unrealized P/L, Best/Worst performers, asset allocation charts, sector allocation, performance table.
 - **CDS Account:** Stocks grouped by GICS sector, sector chips, CSE transaction cost banner, clickable symbol (navigates to Symbol Profile), totals strip. When `transactions` exist for a symbol, CDS values are derived from transactions (single source of truth).
-- **Symbol Profile:** Per-symbol page with company header (logo, name, symbol, sector, current price in LKR), transaction history table (Buy/Sell with CSE-computed commission), and derived metrics: Total Shares Held, Total Investment Value, Avg Holding Price, True Cost, Est. Sell Cost, Net Proceeds, Realized Profit, Unrealized P/L.
+- **Symbol Profile:** Per-symbol page with company header (logo, name, symbol, sector, current price in LKR), transaction history table (Buy/Sell with CSE-computed commission), and derived metrics: Total Shares Held, Current Market Value, Avg Holding Price, True Cost, Est. Sell Cost, Net Proceeds, Realized Profit, Unrealized P/L.
 - **Crypto:** Cards with USD/LKR valuation, allocation, USD→LKR rate banner.
 - **Fixed Deposits:** Cards with principal, interest rate, maturity, interest earned, progress.
 

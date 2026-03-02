@@ -80,7 +80,7 @@ function TransactionTable({ transactions, derived }) {
           </div>
           <div className="transaction-derived-divider" />
           <div className="transaction-derived-item">
-            <span className="transaction-derived-label">Total Investment Value</span>
+            <span className="transaction-derived-label">Current Market Value</span>
             <span className="transaction-derived-value">
               {formatLKRFull(derived.totalInvestmentValue ?? 0)}
             </span>
