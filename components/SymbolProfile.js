@@ -4,6 +4,7 @@
 // =========================================================
 
 function SymbolProfile({ symbol, stocks, transactions, onBack }) {
+  const [showChart, setShowChart] = React.useState(false);
   const symbolData = getSymbolProfile(stocks, symbol);
   const txList = getSymbolTransactions(transactions, symbol);
   const derived = symbolData
@@ -54,7 +55,19 @@ function SymbolProfile({ symbol, stocks, transactions, onBack }) {
         <span className="symbol-profile-breadcrumb-symbol">{symbol}</span>
       </div>
 
-      <SymbolHeader symbolData={symbolData} />
+      <SymbolHeader
+        symbolData={symbolData}
+        showChart={showChart}
+        onChartToggle={() => setShowChart(v => !v)}
+      />
+
+      {showChart && (
+        <StockChart
+          symbol={symbol}
+          transactions={txList}
+          currentPrice={symbolData.currentPrice}
+        />
+      )}
 
       <TransactionTable transactions={txList} derived={derived} />
     </div>

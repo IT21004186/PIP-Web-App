@@ -46,7 +46,7 @@ function SymbolStats({ symbolData }) {
   );
 }
 
-function SymbolHeader({ symbolData }) {
+function SymbolHeader({ symbolData, showChart, onChartToggle }) {
   if (!symbolData) return null;
 
   const { company, symbol, sector, currentPrice, logo } = symbolData;
@@ -79,6 +79,11 @@ function SymbolHeader({ symbolData }) {
               </span>
               <span className="symbol-header-price-label">CURRENT MARKET PRICE (LKR)</span>
             </div>
+            {onChartToggle && (
+              <button type="button" className="chart-btn" onClick={onChartToggle}>
+                {showChart ? "Hide Chart" : "View Chart"}
+              </button>
+            )}
           </div>
         </div>
       </div>
