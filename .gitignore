@@ -3,3 +3,6 @@ data.json
 
 # Debug logs
 debug-*.log
+
+# Local AI guidance — kept local only
+CLAUDE.md
