@@ -1,0 +1,57 @@
+import { useState } from 'react';
+import { getSymbolProfile, getSymbolTransactions, computeSymbolDerived } from '../utils/cseUtils';
+import SymbolHeader    from './SymbolHeader';
+import StockChart      from './StockChart';
+import TransactionTable from './TransactionTable';
+
+export default function SymbolProfile({ symbol, stocks, transactions, onBack }) {
+  const [showChart, setShowChart] = useState(false);
+
+  const symbolData = getSymbolProfile(stocks, symbol);
+  const txList     = getSymbolTransactions(transactions, symbol);
+  const derived    = symbolData ? computeSymbolDerived(txList, symbolData.currentPrice) : null;
+
+  if (!symbol) {
+    return (
+      <div className="page-wrapper symbol-profile-page">
+        <div className="symbol-profile-error">
+          <p>No symbol selected.</p>
+          {onBack && <button type="button" className="symbol-profile-back" onClick={onBack}>← Back to CDS Account</button>}
+        </div>
+      </div>
+    );
+  }
+
+  if (!symbolData) {
+    return (
+      <div className="page-wrapper symbol-profile-page">
+        <div className="symbol-profile-error">
+          <p>Symbol &quot;{symbol}&quot; not found in portfolio.</p>
+          {onBack && <button type="button" className="symbol-profile-back" onClick={onBack}>← Back to CDS Account</button>}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="page-wrapper symbol-profile-page">
+      <div className="symbol-profile-breadcrumb">
+        <button type="button" className="symbol-profile-back" onClick={onBack}>← CDS Account</button>
+        <span className="symbol-profile-breadcrumb-sep">/</span>
+        <span className="symbol-profile-breadcrumb-symbol">{symbol}</span>
+      </div>
+
+      <SymbolHeader
+        symbolData={symbolData}
+        showChart={showChart}
+        onChartToggle={() => setShowChart(v => !v)}
+      />
+
+      {showChart && (
+        <StockChart symbol={symbol} transactions={txList} currentPrice={symbolData.currentPrice} />
+      )}
+
+      <TransactionTable symbol={symbol} transactions={txList} derived={derived} />
+    </div>
+  );
+}
