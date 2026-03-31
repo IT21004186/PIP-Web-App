@@ -6,3 +6,13 @@ debug-*.log
 
 # Local AI guidance — kept local only
 CLAUDE.md
+.claude
+
+#Frontend package files
+/client/package-lock.json
+
+#Server package files
+/server/package-lock.json
+
+node_modules/
+.env
