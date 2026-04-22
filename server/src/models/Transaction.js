@@ -1,14 +1,15 @@
 const { Schema, model } = require('mongoose');
 
-// Each document is one BUY or SELL trade for a CSE-listed stock.
+// Each document is one BUY, SELL, or SCRIP DIVIDEND trade for a CSE-listed stock.
 // grossAmount = shares × avgPrice (stored for convenience; recalculated if missing).
+// SCRIP DIVIDEND: shares received at zero cost — avgPrice and grossAmount are always 0.
 const transactionSchema = new Schema({
   symbol:      { type: String, required: true, uppercase: true, trim: true, index: true },
   tradeDate:   { type: Date, required: true },
   shares:      { type: Number, required: true },
-  avgPrice:    { type: Number, required: true },
-  grossAmount: { type: Number },   // shares × avgPrice; derived on save if omitted
-  status:      { type: String, required: true, enum: ['BUY', 'SELL'], uppercase: true },
+  avgPrice:    { type: Number, default: 0 },   // 0 for SCRIP; required for BUY/SELL
+  grossAmount: { type: Number },               // shares × avgPrice; derived on save if omitted
+  status:      { type: String, required: true, enum: ['BUY', 'SELL', 'SCRIP'], uppercase: true },
 }, { timestamps: true });
 
 // Auto-compute grossAmount before saving if not supplied

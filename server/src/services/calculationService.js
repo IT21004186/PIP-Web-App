@@ -167,6 +167,9 @@ function computeSymbolDerived(transactions, currentPrice) {
       totalShares     -= sold;
       costBasis       -= costOfSold;
       rawCostBasis    -= sold * avgRawCost;
+    } else if (status === 'SCRIP') {
+      // Shares received at zero cost — increase holding, cost basis unchanged
+      totalShares += cseTx.shares || 0;
     }
   }
 

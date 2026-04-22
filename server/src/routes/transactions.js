@@ -19,7 +19,13 @@ router.get('/', async (req, res, next) => {
 router.post('/', async (req, res, next) => {
   try {
     const symbol = req.params.symbol.toUpperCase();
-    const tx = await Transaction.create({ ...req.body, symbol });
+    const body   = { ...req.body, symbol };
+    // SCRIP dividends are received at zero cost — enforce server-side regardless of client payload
+    if ((body.status || '').toUpperCase() === 'SCRIP') {
+      body.avgPrice    = 0;
+      body.grossAmount = 0;
+    }
+    const tx = await Transaction.create(body);
     res.status(201).json(tx);
   } catch (err) { next(err); }
 });
@@ -27,9 +33,14 @@ router.post('/', async (req, res, next) => {
 // PUT /api/stocks/:symbol/transactions/:id — correct a trade
 router.put('/:id', async (req, res, next) => {
   try {
+    const body = { ...req.body };
+    if ((body.status || '').toUpperCase() === 'SCRIP') {
+      body.avgPrice    = 0;
+      body.grossAmount = 0;
+    }
     const tx = await Transaction.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      body,
       { new: true, runValidators: true }
     ).lean();
     if (!tx) return res.status(404).json({ error: 'Transaction not found' });
