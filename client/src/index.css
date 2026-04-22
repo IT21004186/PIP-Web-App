@@ -1130,6 +1130,8 @@ tbody tr:last-child td { border-bottom: none; }
   font-weight: 700;
   color: #111827;
 }
+.transaction-derived-value.text-gain { color: var(--gain); }
+.transaction-derived-value.text-loss { color: var(--loss); }
 
 .transaction-derived-divider {
   width: 1px;
