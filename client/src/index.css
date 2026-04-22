@@ -452,6 +452,7 @@ tbody tr:last-child td { border-bottom: none; }
 .badge-gain  { background: var(--gain-bg);    color: var(--gain); }
 .badge-loss  { background: var(--loss-bg);    color: var(--loss); }
 .badge-neutral { background: var(--neutral-bg); color: var(--neutral); }
+.badge-scrip { background: rgba(87, 155, 213, 0.15); color: #579bd5; }
 .badge-accent  { background: var(--accent-glow); color: var(--accent); }
 
 .text-gain { color: var(--gain); }

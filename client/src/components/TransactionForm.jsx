@@ -19,14 +19,18 @@ export default function TransactionForm({ symbol, tx, onClose }) {
     status:      isEdit ? tx.status      : 'BUY',
   });
 
+  const isScrip = form.status === 'SCRIP';
+
   const [saving, setSaving] = useState(false);
   const [error,  setError]  = useState('');
 
   function set(field, value) { setForm(f => ({ ...f, [field]: value })); }
 
-  const gross = form.shares && form.avgPrice
-    ? (parseFloat(form.shares) * parseFloat(form.avgPrice)).toFixed(2)
-    : '—';
+  const gross = isScrip
+    ? '0.00'
+    : (form.shares && form.avgPrice
+        ? (parseFloat(form.shares) * parseFloat(form.avgPrice)).toFixed(2)
+        : '—');
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -36,7 +40,7 @@ export default function TransactionForm({ symbol, tx, onClose }) {
       const payload = {
         tradeDate: form.tradeDate,
         shares:    parseFloat(form.shares),
-        avgPrice:  parseFloat(form.avgPrice),
+        avgPrice:  isScrip ? 0 : parseFloat(form.avgPrice),
         status:    form.status,
       };
       if (isEdit) await updateTransaction(symbol, tx._id, payload);
@@ -64,6 +68,7 @@ export default function TransactionForm({ symbol, tx, onClose }) {
             <select value={form.status} onChange={e => set('status', e.target.value)}>
               <option value="BUY">BUY</option>
               <option value="SELL">SELL</option>
+              <option value="SCRIP">SCRIP DIVIDEND</option>
             </select>
           </div>
         </div>
@@ -74,12 +79,20 @@ export default function TransactionForm({ symbol, tx, onClose }) {
             <input required type="number" step="1" min="1" value={form.shares}
               onChange={e => set('shares', e.target.value)} placeholder="0" />
           </div>
-          <div className="form-group">
-            <label>Avg Price (LKR) *</label>
-            <input required type="number" step="0.0001" min="0.0001" value={form.avgPrice}
-              onChange={e => set('avgPrice', e.target.value)} placeholder="0.0000" />
-          </div>
+          {!isScrip && (
+            <div className="form-group">
+              <label>Avg Price (LKR) *</label>
+              <input required type="number" step="0.0001" min="0.0001" value={form.avgPrice}
+                onChange={e => set('avgPrice', e.target.value)} placeholder="0.0000" />
+            </div>
+          )}
         </div>
+
+        {isScrip && (
+          <p style={{ margin: '4px 0 8px', fontSize: '0.82rem', color: 'var(--text-muted, #888)' }}>
+            Scrip shares are received at no cost — no price or commission applies.
+          </p>
+        )}
 
         <div className="form-calc-preview">
           <span className="form-calc-label">Gross Amount</span>

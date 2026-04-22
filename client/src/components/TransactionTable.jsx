@@ -50,17 +50,18 @@ export default function TransactionTable({ symbol, transactions, derived }) {
               <tr><td colSpan={8} className="transaction-table-empty">No transactions recorded</td></tr>
             ) : (
               sorted.map((tx, idx) => {
-                const cseTx = computeTransactionWithCSE(tx);
-                const isBuy = (cseTx.status || '').toUpperCase() === 'BUY';
+                const cseTx  = computeTransactionWithCSE(tx);
+                const status = (cseTx.status || '').toUpperCase();
+                const badgeCls = status === 'BUY' ? 'badge-gain' : status === 'SELL' ? 'badge-loss' : 'badge-scrip';
                 return (
                   <tr key={idx} className="transaction-table-row">
                     <td>{formatDate(cseTx.tradeDate)}</td>
                     <td>{formatNum(cseTx.shares ?? 0, 0)}</td>
-                    <td>{formatLKRFull(cseTx.avgPrice ?? 0)}</td>
-                    <td>{formatLKRFull(cseTx.grossAmount ?? 0)}</td>
-                    <td>{formatLKRFull(cseTx.commission)}</td>
-                    <td>{formatLKRFull(cseTx.netAmount)}</td>
-                    <td><span className={`badge badge-${isBuy ? 'gain' : 'loss'}`}>{cseTx.status || '—'}</span></td>
+                    <td>{status === 'SCRIP' ? '—' : formatLKRFull(cseTx.avgPrice ?? 0)}</td>
+                    <td>{status === 'SCRIP' ? '—' : formatLKRFull(cseTx.grossAmount ?? 0)}</td>
+                    <td>{status === 'SCRIP' ? '—' : formatLKRFull(cseTx.commission)}</td>
+                    <td>{status === 'SCRIP' ? '—' : formatLKRFull(cseTx.netAmount)}</td>
+                    <td><span className={`badge ${badgeCls}`}>{cseTx.status || '—'}</span></td>
                     <td>
                       {symbol && (
                         <div style={{ display: 'flex', gap: 5 }}>
