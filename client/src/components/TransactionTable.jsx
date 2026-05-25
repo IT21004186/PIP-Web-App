@@ -13,10 +13,16 @@ function formatDate(dateStr) {
 export default function TransactionTable({ symbol, transactions, derived }) {
   const qc = useQueryClient();
   const [txForm, setTxForm] = useState(null);  // null | 'add' | txObj
+  const [page, setPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
   const sorted = [...(transactions || [])].sort(
     (a, b) => new Date(b.tradeDate) - new Date(a.tradeDate)
   );
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / rowsPerPage));
+  const safePage = Math.min(page, totalPages);
+  const paginated = sorted.slice((safePage - 1) * rowsPerPage, safePage * rowsPerPage);
 
   async function handleDeleteTx(tx) {
     if (!window.confirm('Delete this transaction? This cannot be undone.')) return;
@@ -49,7 +55,7 @@ export default function TransactionTable({ symbol, transactions, derived }) {
             {sorted.length === 0 ? (
               <tr><td colSpan={8} className="transaction-table-empty">No transactions recorded</td></tr>
             ) : (
-              sorted.map((tx, idx) => {
+              paginated.map((tx, idx) => {
                 const cseTx  = computeTransactionWithCSE(tx);
                 const status = (cseTx.status || '').toUpperCase();
                 const badgeCls = status === 'BUY' ? 'badge-gain' : status === 'SELL' ? 'badge-loss' : 'badge-scrip';
@@ -81,6 +87,26 @@ export default function TransactionTable({ symbol, transactions, derived }) {
           </tbody>
         </table>
       </div>
+
+      {sorted.length > 0 && (
+        <div className="transaction-pagination">
+          <div className="pagination-rows-select">
+            <span>Rows per page:</span>
+            <select value={rowsPerPage} onChange={e => { setRowsPerPage(Number(e.target.value)); setPage(1); }}>
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+            </select>
+          </div>
+          <div className="pagination-controls">
+            <span className="pagination-range">
+              {(safePage - 1) * rowsPerPage + 1}–{Math.min(safePage * rowsPerPage, sorted.length)} of {sorted.length}
+            </span>
+            <button className="btn btn-ghost btn-icon" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={safePage === 1}>‹</button>
+            <button className="btn btn-ghost btn-icon" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={safePage === totalPages}>›</button>
+          </div>
+        </div>
+      )}
 
       {txForm && (
         <TransactionForm
