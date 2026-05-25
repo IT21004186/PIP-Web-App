@@ -250,7 +250,7 @@ function getPortfolioTotals(stocks, cryptos, fds, usdToLkr) {
   const bestStock  = [...sortedByPL].sort((a, b) => b.plPercent - a.plPercent)[0] || null;
   const worstStock = [...sortedByPL].sort((a, b) => a.plPercent - b.plPercent)[0] || null;
 
-  const grouped      = groupBySector(stocks);
+  const grouped      = groupBySector(stocks.filter(s => s.quantity > 0));
   const sectorTotals = Object.entries(grouped).map(([sector, items]) => ({
     sector,
     color:             SECTOR_COLORS[sector] || '#888',
@@ -260,7 +260,7 @@ function getPortfolioTotals(stocks, cryptos, fds, usdToLkr) {
     netSaleProceeds:   items.reduce((s, x) => s + x.netSaleProceeds, 0),
     unrealizedPL:      items.reduce((s, x) => s + x.unrealizedPL, 0),
     allocationPct:     cdsTotalValue > 0 ? (items.reduce((s, x) => s + x.marketValue, 0) / cdsTotalValue) * 100 : 0,
-  }));
+  })).filter(s => s.marketValue > 0);
 
   return {
     cdsTotalValue, cdsTotalCostRaw, cdsTotalBuyCost, cdsTotalCost,

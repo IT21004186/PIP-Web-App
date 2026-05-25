@@ -150,7 +150,7 @@ function SectorAllocationChart({ totals }) {
   useEffect(() => {
     if (!canvasRef.current) return;
     if (chartRef.current) chartRef.current.destroy();
-    const sectors = [...totals.sectorTotals].sort((a, b) => b.marketValue - a.marketValue);
+    const sectors = [...totals.sectorTotals].filter(s => s.marketValue > 0).sort((a, b) => b.marketValue - a.marketValue);
     chartRef.current = new Chart(canvasRef.current, {
       type: 'bar',
       data: {
@@ -160,7 +160,7 @@ function SectorAllocationChart({ totals }) {
           data: sectors.map(s => s.marketValue),
           backgroundColor: sectors.map(s => s.color + 'cc'),
           borderColor: sectors.map(s => s.color),
-          borderWidth: 1, borderRadius: 6, borderSkipped: false,
+          borderWidth: 1, borderRadius: 4, borderSkipped: false, minBarLength: 6,
         }],
       },
       options: {
