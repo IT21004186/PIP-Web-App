@@ -7,6 +7,7 @@ import CryptoSavings     from './components/CryptoSavings';
 import FixedDeposits     from './components/FixedDeposits';
 import SymbolProfile     from './components/SymbolProfile';
 import InvestmentLogs    from './components/InvestmentLogs';
+import DividendsLedger   from './components/DividendsLedger';
 
 function LoadingScreen() {
   return (
@@ -79,6 +80,7 @@ export default function App() {
       case 'crypto':    return <CryptoSavings cryptos={cryptos} totals={totals} />;
       case 'fd':        return <FixedDeposits fds={fds} totals={totals} />;
       case 'logs':      return <InvestmentLogs />;
+      case 'dividends': return <DividendsLedger />;
       case 'symbol':    return <SymbolProfile symbol={selectedSymbol} stocks={stocks} transactions={transactions} onBack={handleSymbolBack} />;
       default:          return <Dashboard stocks={stocks} cryptos={cryptos} fds={fds} totals={totals} />;
     }

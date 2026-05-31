@@ -8,6 +8,7 @@ const transactionRoutes     = require('./routes/transactions');
 const cryptoRoutes          = require('./routes/crypto');
 const fdRoutes              = require('./routes/fixedDeposits');
 const investmentLogRoutes   = require('./routes/investmentLogs');
+const dividendRoutes        = require('./routes/dividends');
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use('/api/stocks/:symbol/transactions', transactionRoutes);
 app.use('/api/crypto',                    cryptoRoutes);
 app.use('/api/fd',                        fdRoutes);
 app.use('/api/investment-logs',           investmentLogRoutes);
+app.use('/api/dividends',                 dividendRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));

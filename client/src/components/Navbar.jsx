@@ -11,6 +11,7 @@ export default function Navbar({ activePage, onNavigate, totals }) {
     { id: 'crypto',    icon: '₿',  text: 'Crypto' },
     { id: 'fd',        icon: '🏦', text: 'Fixed Deposits' },
     { id: 'logs',      icon: '📒', text: 'Investment Logs' },
+    { id: 'dividends', icon: '💰', text: 'Dividends' },
   ];
 
   return (

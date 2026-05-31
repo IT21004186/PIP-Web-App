@@ -39,3 +39,9 @@ export const fetchInvestmentLogs  = ()           => request('/api/investment-log
 export const addInvestmentLog     = (data)       => request('/api/investment-logs',        'POST',   data);
 export const updateInvestmentLog  = (id, data)   => request(`/api/investment-logs/${id}`,  'PUT',    data);
 export const deleteInvestmentLog  = (id)         => request(`/api/investment-logs/${id}`,  'DELETE');
+
+// ── Dividends ─────────────────────────────────────────────
+export const fetchDividends   = ()         => request('/api/dividends',        'GET');
+export const addDividend      = (data)     => request('/api/dividends',        'POST',   data);
+export const updateDividend   = (id, data) => request(`/api/dividends/${id}`,  'PUT',    data);
+export const deleteDividend   = (id)       => request(`/api/dividends/${id}`,  'DELETE');
