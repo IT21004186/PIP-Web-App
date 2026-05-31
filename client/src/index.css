@@ -1579,6 +1579,85 @@ tbody tr:last-child td { border-bottom: none; }
 }
 
 /* =========================================================
+   INVESTMENT LOGS PAGE
+   ========================================================= */
+.inv-log-table-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.inv-log-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.inv-log-table thead tr {
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.inv-log-table th {
+  padding: 11px 14px;
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* Per-column widths so headers stay locked to their data */
+.inv-log-table th:nth-child(1) { width: 48px; }
+.inv-log-table th:nth-child(2) { width: 140px; }
+.inv-log-table th:nth-child(3) { width: 180px; }
+
+.inv-log-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+
+.inv-log-table tbody tr:last-child { border-bottom: none; }
+.inv-log-table tbody tr:hover { background: var(--bg-card-hover); }
+
+.inv-log-table td {
+  padding: 11px 14px;
+  color: var(--text-primary);
+  vertical-align: middle;
+}
+
+.inv-log-table tfoot .total-row {
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.inv-log-num    { text-align: center; color: var(--text-muted); font-size: 0.78rem; width: 48px; }
+.inv-log-date   { text-align: left;  white-space: nowrap; color: var(--text-secondary); }
+.inv-log-amount { text-align: right; font-weight: 600; white-space: nowrap; }
+.inv-log-note   { text-align: left;  color: var(--text-secondary); font-size: 0.85rem; }
+
+.inv-log-empty {
+  padding: 48px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.inv-log-empty-cell {
+  text-align: center;
+  padding: 40px 14px;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+/* =========================================================
    RESPONSIVE
    ========================================================= */
 @media (max-width: 900px) {

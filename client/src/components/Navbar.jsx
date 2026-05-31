@@ -10,6 +10,7 @@ export default function Navbar({ activePage, onNavigate, totals }) {
     { id: 'cds',       icon: '📈', text: 'CDS Account' },
     { id: 'crypto',    icon: '₿',  text: 'Crypto' },
     { id: 'fd',        icon: '🏦', text: 'Fixed Deposits' },
+    { id: 'logs',      icon: '📒', text: 'Investment Logs' },
   ];
 
   return (

@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { usePortfolio } from './hooks/usePortfolio';
-import Navbar          from './components/Navbar';
-import Dashboard       from './components/Dashboard';
-import CDSAccount      from './components/CDSAccount';
-import CryptoSavings   from './components/CryptoSavings';
-import FixedDeposits   from './components/FixedDeposits';
-import SymbolProfile   from './components/SymbolProfile';
+import Navbar            from './components/Navbar';
+import Dashboard         from './components/Dashboard';
+import CDSAccount        from './components/CDSAccount';
+import CryptoSavings     from './components/CryptoSavings';
+import FixedDeposits     from './components/FixedDeposits';
+import SymbolProfile     from './components/SymbolProfile';
+import InvestmentLogs    from './components/InvestmentLogs';
 
 function LoadingScreen() {
   return (
@@ -77,6 +78,7 @@ export default function App() {
       case 'cds':       return <CDSAccount stocks={stocks} totals={totals} onSymbolClick={handleSymbolClick} />;
       case 'crypto':    return <CryptoSavings cryptos={cryptos} totals={totals} />;
       case 'fd':        return <FixedDeposits fds={fds} totals={totals} />;
+      case 'logs':      return <InvestmentLogs />;
       case 'symbol':    return <SymbolProfile symbol={selectedSymbol} stocks={stocks} transactions={transactions} onBack={handleSymbolBack} />;
       default:          return <Dashboard stocks={stocks} cryptos={cryptos} fds={fds} totals={totals} />;
     }

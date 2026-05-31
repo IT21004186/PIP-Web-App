@@ -33,3 +33,9 @@ export const deleteCrypto = (symbol)         => request(`/api/crypto/${symbol}`,
 export const addFD    = (data)   => request('/api/fd',        'POST',   data);
 export const updateFD = (id, data) => request(`/api/fd/${id}`, 'PUT',    data);
 export const deleteFD = (id)     => request(`/api/fd/${id}`,  'DELETE');
+
+// ── Investment Logs ───────────────────────────────────────
+export const fetchInvestmentLogs  = ()           => request('/api/investment-logs',        'GET');
+export const addInvestmentLog     = (data)       => request('/api/investment-logs',        'POST',   data);
+export const updateInvestmentLog  = (id, data)   => request(`/api/investment-logs/${id}`,  'PUT',    data);
+export const deleteInvestmentLog  = (id)         => request(`/api/investment-logs/${id}`,  'DELETE');
