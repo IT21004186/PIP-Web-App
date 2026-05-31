@@ -32,13 +32,14 @@ function KPIIcon({ src, fallback }) {
 
 function KPIGrid({ totals }) {
   const plSign  = totals.totalPL >= 0 ? '+' : '';
+  const plColorHex = totals.totalPL >= 0 ? '#10b981' : '#ef4444';
   const kpis = [
     {
       label: 'Total Net Worth',
       value: formatLKRFull(totals.totalNetWorth),
       sub: `${formatLKR(totals.fdTotalPrincipal)} invested in FDs`,
       icon: '/Assets/net-worth.png', iconFallback: '💰',
-      color: 'var(--accent)', valueClass: '',
+      color: 'var(--accent)', colorHex: '#3b82f6', valueClass: '',
     },
     {
       label: 'Total Unrealized P/L',
@@ -46,6 +47,7 @@ function KPIGrid({ totals }) {
       sub: `CDS: ${formatLKR(totals.cdsTotalPL)} · Crypto: ${formatLKR(totals.cryptoTotalPL)}`,
       icon: '/Assets/unrealized-pl.png', iconFallback: '📈',
       color: totals.totalPL >= 0 ? 'var(--gain)' : 'var(--loss)',
+      colorHex: plColorHex,
       valueClass: totals.totalPL >= 0 ? 'gain' : 'loss',
     },
     {
@@ -53,14 +55,14 @@ function KPIGrid({ totals }) {
       value: totals.bestStock ? totals.bestStock.symbol : '—',
       sub: totals.bestStock ? `${formatPct(totals.bestStock.plPercent)} · ${totals.bestStock.company}` : '',
       icon: '/Assets/best-performer.png', iconFallback: '🏆',
-      color: 'var(--gain)', valueClass: 'gain',
+      color: 'var(--gain)', colorHex: '#10b981', valueClass: 'gain',
     },
     {
       label: 'Worst Performer',
       value: totals.worstStock ? totals.worstStock.symbol : '—',
       sub: totals.worstStock ? `${formatPct(totals.worstStock.plPercent)} · ${totals.worstStock.company}` : '',
       icon: '/Assets/worst-performer.png', iconFallback: '📉',
-      color: 'var(--loss)',
+      color: 'var(--loss)', colorHex: '#ef4444',
       valueClass: totals.worstStock && totals.worstStock.plPercent < 0 ? 'loss' : '',
     },
   ];
@@ -69,8 +71,15 @@ function KPIGrid({ totals }) {
     <div className="kpi-grid">
       {kpis.map((kpi, i) => (
         <div key={i} className="kpi-card" style={{ '--kpi-color': kpi.color }}>
-          <div className="kpi-icon"><KPIIcon src={kpi.icon} fallback={kpi.iconFallback} /></div>
-          <div className="kpi-label">{kpi.label}</div>
+          <div className="kpi-top-row">
+            <div className="kpi-label">{kpi.label}</div>
+            <div
+              className="kpi-icon"
+              style={{ background: kpi.colorHex + '1a', border: `1px solid ${kpi.colorHex}30` }}
+            >
+              <KPIIcon src={kpi.icon} fallback={kpi.iconFallback} />
+            </div>
+          </div>
           <div className={`kpi-value ${kpi.valueClass}`}>{kpi.value}</div>
           <div className="kpi-sub">{kpi.sub}</div>
         </div>
@@ -126,8 +135,12 @@ function AssetAllocationChart({ totals }) {
   return (
     <div className="chart-card">
       <h3>Asset Allocation</h3>
-      <div className="chart-container">
+      <div className="chart-container donut-chart-wrapper">
         <canvas ref={canvasRef} height="200" />
+        <div className="donut-center-label">
+          <div className="donut-center-value">{formatLKR(totals.totalNetWorth)}</div>
+          <div className="donut-center-sub">Total</div>
+        </div>
       </div>
       <div className="donut-legend">
         {totals.assetAllocation.map((a, i) => (
@@ -202,6 +215,8 @@ function SectorAllocationChart({ totals }) {
   );
 }
 
+const PERF_ROW_COLORS = ['#3b82f6', '#9945FF', '#f59e0b'];
+
 function PerformanceTable({ totals }) {
   const rows = [
     {
@@ -247,12 +262,16 @@ function PerformanceTable({ totals }) {
           </thead>
           <tbody>
             {rows.map((row, i) => (
-              <tr key={i}>
+              <tr key={i} className="perf-row" style={{ '--row-accent': PERF_ROW_COLORS[i] }}>
                 <td>
                   <div style={{ fontWeight: 600 }}>{row.asset}</div>
                   {row.note && <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 2 }}>{row.note}</div>}
                 </td>
-                <td className="text-secondary">{row.type}</td>
+                <td>
+                  <span className="perf-type-pill" style={{ background: PERF_ROW_COLORS[i] + '18', color: PERF_ROW_COLORS[i], border: `1px solid ${PERF_ROW_COLORS[i]}30` }}>
+                    {row.type}
+                  </span>
+                </td>
                 <td className="text-secondary">{row.investedValue}</td>
                 <td style={{ fontWeight: 600 }}>{row.currentValue}</td>
                 <td style={{ color: 'var(--text-secondary)' }}>{row.netProceeds}</td>
@@ -264,8 +283,8 @@ function PerformanceTable({ totals }) {
                 <td><span className={`badge badge-${row.plPct >= 0 ? 'gain' : 'loss'}`}>{formatPct(row.plPct)}</span></td>
                 <td>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end' }}>
-                    <div style={{ width: 60, height: 4, background: 'var(--bg-surface)', borderRadius: 2, overflow: 'hidden' }}>
-                      <div style={{ width: `${row.alloc}%`, height: '100%', background: ['var(--accent)', '#9945FF', 'var(--neutral)'][i], borderRadius: 2 }} />
+                    <div style={{ width: 64, height: 6, background: 'var(--bg-surface)', borderRadius: 3, overflow: 'hidden' }}>
+                      <div style={{ width: `${row.alloc}%`, height: '100%', background: PERF_ROW_COLORS[i], borderRadius: 3 }} />
                     </div>
                     <span style={{ fontWeight: 600, minWidth: 40, textAlign: 'right' }}>{row.alloc.toFixed(1)}%</span>
                   </div>
