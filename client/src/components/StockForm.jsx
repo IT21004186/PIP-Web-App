@@ -119,7 +119,7 @@ export default function StockForm({ stock, onClose }) {
           </div>
           <div className="form-group">
             <label>Avg Buy Price (fallback)</label>
-            <input type="number" step="0.0001" min="0" value={form.avgBuyPrice}
+            <input type="number" step="any" min="0" value={form.avgBuyPrice}
               onChange={e => set('avgBuyPrice', e.target.value)} placeholder="0.0000" />
           </div>
         </div>

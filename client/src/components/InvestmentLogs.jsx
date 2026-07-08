@@ -14,9 +14,15 @@ function formatDate(dateStr) {
 export default function InvestmentLogs() {
   const { data: logs = [], isLoading, error } = useInvestmentLogs();
   const [logForm, setLogForm] = useState(null); // null | 'add' | logObj
+  const [page, setPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const qc = useQueryClient();
 
   const total = logs.reduce((sum, l) => sum + l.amount, 0);
+
+  const totalPages = Math.max(1, Math.ceil(logs.length / rowsPerPage));
+  const safePage = Math.min(page, totalPages);
+  const paginated = logs.slice((safePage - 1) * rowsPerPage, safePage * rowsPerPage);
 
   async function handleDelete(log) {
     if (!window.confirm(`Delete log entry for ${formatDate(log.date)}? This cannot be undone.`)) return;
@@ -78,9 +84,9 @@ export default function InvestmentLogs() {
                     </td>
                   </tr>
                 ) : (
-                  logs.map((log, i) => (
+                  paginated.map((log, i) => (
                     <tr key={log._id}>
-                      <td className="inv-log-num">{i + 1}</td>
+                      <td className="inv-log-num">{(safePage - 1) * rowsPerPage + i + 1}</td>
                       <td className="inv-log-date">{formatDate(log.date)}</td>
                       <td className="inv-log-amount">{formatLKRFull(log.amount)}</td>
                       <td className="inv-log-note">{log.note || <span className="text-muted">—</span>}</td>
@@ -115,6 +121,26 @@ export default function InvestmentLogs() {
               )}
             </table>
           </div>
+
+          {logs.length > 0 && (
+            <div className="transaction-pagination">
+              <div className="pagination-rows-select">
+                <span>Rows per page:</span>
+                <select value={rowsPerPage} onChange={e => { setRowsPerPage(Number(e.target.value)); setPage(1); }}>
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                </select>
+              </div>
+              <div className="pagination-controls">
+                <span className="pagination-range">
+                  {(safePage - 1) * rowsPerPage + 1}–{Math.min(safePage * rowsPerPage, logs.length)} of {logs.length}
+                </span>
+                <button className="btn btn-ghost btn-icon" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={safePage === 1}>‹</button>
+                <button className="btn btn-ghost btn-icon" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={safePage === totalPages}>›</button>
+              </div>
+            </div>
+          )}
 
           {logs.length > 0 && (
             <div className="totals-strip" style={{ marginTop: 16 }}>
